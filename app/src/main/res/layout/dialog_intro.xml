@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <!-- Nút đóng (dấu "X") -->
+    <ImageView
+        android:id="@+id/btnCloseDialog"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/x_solid"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="8dp"
+        android:onClick="closeDialog" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="1000dp"
+        app:layout_constraintTop_toBottomOf="@id/btnCloseDialog"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/fullIntroContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trung tâm Hội nghị – Tiệc cưới Diamond Place – là hệ thống trung tâm hội nghị và tiệc cưới sang trọng, đẳng cấp chuyên cung cấp các dịch vụ tổ chức tiệc, sự kiện tại nhà hàng hoặc địa điểm theo yêu cầu dành cho cá nhân và doanh nghiệp tại Thành phố Hồ Chí Minh.
+
+Nằm ngay mặt tiền 15A đường Hồ Văn Huê, quận Phú Nhuận, thuận tiện cho việc đi lại.
+
+Với sứ mệnh “mang đến sự trọn vẹn trong ngày trọng đại”, Diamond Place vẫn không ngừng nỗ lực, luôn lắng nghe những chia sẻ của khách hàng để phát triển hơn mỗi ngày."
+            android:textSize="16sp"
+            android:background="#E0E0E0"
+            android:maxLines="100"
+            android:ellipsize="end" />
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

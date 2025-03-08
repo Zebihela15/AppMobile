@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/baseline_home_24"
+        android:title="Home"/>
+    <item
+        android:id="@+id/nav_notification"
+        android:icon="@drawable/bell_solid"
+        android:title="Thông báo"/>
+    <item
+        android:id="@+id/nav_person"
+        android:icon="@drawable/person_solid"
+        android:title="Tài khoản"/>
+</menu>
