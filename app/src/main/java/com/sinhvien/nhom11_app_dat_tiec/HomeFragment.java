@@ -43,28 +43,7 @@ public class HomeFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationSpinner.setAdapter(adapter);
 
-        locationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedLocation = locations.get(position);
-                if (selectedLocation.equals("Chọn địa điểm")) {}
-                else if (selectedLocation.equals("Hồ Chí Minh")) {
-                    Intent intentHCM = new Intent(getContext(), HoChiMinhActivity.class);
-                    startActivity(intentHCM);
-                }
-                else if (selectedLocation.equals("Hà Nội")) {
-                    Intent intentHN = new Intent(getContext(), HaNoiActivity.class);
-                    startActivity(intentHN);
-                } else if (selectedLocation.equals("Đà Nẵng")) {
-                    Intent intentDN = new Intent(getContext(), DaNangActivity.class);
-                    startActivity(intentDN);
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
 
-
-        });
 
     }
 }

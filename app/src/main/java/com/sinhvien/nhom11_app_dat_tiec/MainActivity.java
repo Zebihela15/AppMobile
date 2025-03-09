@@ -3,15 +3,18 @@ package com.sinhvien.nhom11_app_dat_tiec;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
+import com.sinhvien.nhom11_app_dat_tiec.DatabaseHelper.Restaurant;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,22 +25,23 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView featuredRecyclerView;
     private FeaturedRestaurantAdapter featuredRestaurantAdapter;
     private BottomNavigationView bottomNavigationView;
+    private EditText searchBar;
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Khởi tạo DatabaseHelper
+        databaseHelper = new DatabaseHelper(this);
+
         // Xử lý RecyclerView hiển thị nhà hàng nổi bật
         featuredRecyclerView = findViewById(R.id.featuredRecyclerView);
         featuredRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        List<Restaurant> restaurantList = new ArrayList<>();
-        restaurantList.add(new Restaurant(R.drawable.dtc1, "Diamond Place 1", "Không gian thoáng đãng, dịch vụ chu đáo."));
-        restaurantList.add(new Restaurant(R.drawable.dtc2, "Tràng An Palace", "Phong cách sang trọng, chuyên nghiệp."));
-        restaurantList.add(new Restaurant(R.drawable.dtc3, "New Orient Hotel", "Địa điểm lý tưởng để tổ chức tiệc cưới."));
-
-        // Khởi tạo adapter với context và danh sách nhà hàng
+        // Lấy danh sách nhà hàng từ database
+        List<Restaurant> restaurantList = databaseHelper.getAllRestaurants();
         featuredRestaurantAdapter = new FeaturedRestaurantAdapter(this, restaurantList);
         featuredRecyclerView.setAdapter(featuredRestaurantAdapter);
 
@@ -58,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
             viewPager.setCurrentItem(nextItem, true);
             autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
         };
-
         autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
 
         // Xử lý BottomNavigationView
@@ -72,6 +75,23 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 return false;
+            }
+        });
+
+        // Xử lý tìm kiếm
+        searchBar = findViewById(R.id.searchBar);
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().trim();
+                List<Restaurant> filteredList = databaseHelper.searchRestaurants(query);
+                featuredRestaurantAdapter.updateList(filteredList);
             }
         });
     }

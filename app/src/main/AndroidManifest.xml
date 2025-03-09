@@ -25,10 +25,9 @@
         <!-- Khai báo các Activity khác -->
         <activity android:name=".SignupActivity" android:exported="true"/>
         <activity android:name=".MainActivity" android:exported="true"/>
-        <activity android:name=".HoChiMinhActivity"/>
-        <activity android:name=".HaNoiActivity"/>
-        <activity android:name=".DaNangActivity"/>
+
         <activity android:name=".UserInfoActivity"/>
+
         <activity android:name=".InfoNhaHang1Activity" />
         <activity android:name=".BookingActivity" />
 

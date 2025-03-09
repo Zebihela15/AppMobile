@@ -16,9 +16,9 @@ import java.util.List;
 public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRestaurantAdapter.ViewHolder> {
 
     private Context context;
-    private List<Restaurant> restaurantList;
+    private List<DatabaseHelper.Restaurant> restaurantList;
 
-    public FeaturedRestaurantAdapter(Context context, List<Restaurant> restaurantList) {
+    public FeaturedRestaurantAdapter(Context context, List<DatabaseHelper.Restaurant> restaurantList) {
         this.context = context;
         this.restaurantList = restaurantList;
     }
@@ -32,16 +32,30 @@ public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRest
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Restaurant restaurant = restaurantList.get(position);
+        DatabaseHelper.Restaurant restaurant = restaurantList.get(position);
         holder.featuredImage.setImageResource(restaurant.getImage());
         holder.featuredTitle.setText(restaurant.getTitle());
+        holder.featuredDescription.setText(restaurant.getDescription());
 
-        // Thêm sự kiện click
+        // Thêm sự kiện click dựa trên tiêu đề nhà hàng
         holder.itemView.setOnClickListener(v -> {
-            if (position == 0) { // Diamond Place 1 là item đầu tiên (index 0)
-                Intent intent = new Intent(context, InfoNhaHang1Activity.class);
-                context.startActivity(intent);
+            Intent intent;
+            String restaurantTitle = restaurant.getTitle();
+
+            switch (restaurantTitle) {
+                case "Diamond Place 1":
+                    intent = new Intent(context, InfoNhaHang1Activity.class);
+                    break;
+                case "Tràng An Palace":
+                    intent = new Intent(context, InfoNhaHang2Activity.class);
+                    break;
+                case "New Orient Hotel":
+                    intent = new Intent(context, InfoNhaHang3Activity.class);
+                    break;
+                default:
+                    return; // Không làm gì nếu không khớp
             }
+            context.startActivity(intent);
         });
     }
 
@@ -50,14 +64,22 @@ public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRest
         return restaurantList.size();
     }
 
+    // Cập nhật danh sách nhà hàng khi tìm kiếm
+    public void updateList(List<DatabaseHelper.Restaurant> newList) {
+        restaurantList = newList;
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView featuredImage;
         TextView featuredTitle;
+        TextView featuredDescription;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             featuredImage = itemView.findViewById(R.id.featuredImage);
             featuredTitle = itemView.findViewById(R.id.featuredTitle);
+            featuredDescription = itemView.findViewById(R.id.featuredDescription);
         }
     }
 }
