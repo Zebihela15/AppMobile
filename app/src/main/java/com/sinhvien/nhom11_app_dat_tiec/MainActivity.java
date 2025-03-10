@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         imageList.add(R.drawable.dtc2);
         imageList.add(R.drawable.dtc3);
 
-        ImageAdapter imageAdapter = new ImageAdapter(this,imageList);
+        ImageAdapter imageAdapter = new ImageAdapter(this, imageList, true);
         viewPager.setAdapter(imageAdapter);
 
         autoScrollRunnable = () -> {

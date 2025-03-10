@@ -15,11 +15,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
 
     private Context context;
     private List<Integer> imageList;
+    private boolean isViewPager;
 
     // Constructor nhận List<Integer>
-    public ImageAdapter(Context context, List<Integer> imageList) {
+    public ImageAdapter(Context context, List<Integer> imageList,boolean isViewPager) {
         this.context = context;
         this.imageList = imageList;
+        this.isViewPager=isViewPager;
     }
 
 
@@ -34,7 +36,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_image_menu, parent, false);
+        int layout = isViewPager ? R.layout.item_image : R.layout.item_image_menu;
+        View view = LayoutInflater.from(context).inflate(layout, parent, false);
         return new ViewHolder(view);
     }
 
