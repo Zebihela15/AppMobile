@@ -35,7 +35,7 @@ public class BookingActivity extends AppCompatActivity {
     private int tableCount = 5;
     private String selectedDate = "";
     private static final int MAX_TABLES = 20;
-    private int restaurantId; // Thêm biến này để lưu restaurantId
+    private int restaurantId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
