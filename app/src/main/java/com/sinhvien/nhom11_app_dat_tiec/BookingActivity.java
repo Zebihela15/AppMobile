@@ -104,7 +104,7 @@ public class BookingActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.btnDecrease).setOnClickListener(v -> {
-            if (tableCount > 1) {
+            if (tableCount > 5) {
                 tableCount--;
                 etTableCount.setText(String.valueOf(tableCount));
                 updateTotalPrice();
