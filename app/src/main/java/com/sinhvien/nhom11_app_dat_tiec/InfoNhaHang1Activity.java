@@ -1,5 +1,6 @@
 package com.sinhvien.nhom11_app_dat_tiec;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -59,6 +60,10 @@ public class InfoNhaHang1Activity extends AppCompatActivity {
 
     public void closeDialog(View view) {
         fullIntroDialog.dismiss();
+    }
+    public void onBookingButtonClick(View view) {
+        Intent intent = new Intent(InfoNhaHang1Activity.this, BookingActivity.class);
+        startActivity(intent);
     }
 }
 

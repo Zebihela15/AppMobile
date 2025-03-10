@@ -70,7 +70,7 @@
                 android:id="@+id/btnIncrease"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:text="-"
+                android:text="+"
                 android:textSize="24sp"
                 android:backgroundTint="@color/red"
                 android:textColor="@color/white"

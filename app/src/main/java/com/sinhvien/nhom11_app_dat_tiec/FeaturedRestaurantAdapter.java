@@ -46,10 +46,10 @@ public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRest
                 case "Diamond Place 1":
                     intent = new Intent(context, InfoNhaHang1Activity.class);
                     break;
-                case "Tràng An Palace":
+                case "Diamond Place 2":
                     intent = new Intent(context, InfoNhaHang2Activity.class);
                     break;
-                case "New Orient Hotel":
+                case "Diamond Place 3":
                     intent = new Intent(context, InfoNhaHang3Activity.class);
                     break;
                 default:
