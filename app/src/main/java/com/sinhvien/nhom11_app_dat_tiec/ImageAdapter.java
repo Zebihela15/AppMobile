@@ -1,36 +1,40 @@
 package com.sinhvien.nhom11_app_dat_tiec;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
+    private Context context;
     private List<Integer> imageList;
 
-    // Constructor cho MainActivity
-    public ImageAdapter(List<Integer> imageList) {
+    // Constructor nhận List<Integer>
+    public ImageAdapter(Context context, List<Integer> imageList) {
+        this.context = context;
         this.imageList = imageList;
     }
 
-    // Constructor cho InfoNhaHang1Activity
-    public ImageAdapter(AppCompatActivity activity, int[] imageResources) {
+
+    public ImageAdapter(Context context, int[] imageArray) {
+        this.context = context;
         this.imageList = new ArrayList<>();
-        for (int res : imageResources) {
-            this.imageList.add(res);
+        for (int image : imageArray) {
+            this.imageList.add(image);
         }
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_image_menu, parent, false);
         return new ViewHolder(view);
     }
 
@@ -38,6 +42,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         int imageRes = imageList.get(position);
         holder.imageView.setImageResource(imageRes);
+
+        holder.imageView.setOnClickListener(v -> showFullImageDialog(imageRes));
     }
 
     @Override
@@ -52,5 +58,20 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView);
         }
+    }
+
+
+    private void showFullImageDialog(int imageId) {
+        Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.dialog_full_image);
+
+        ImageView fullImageView = dialog.findViewById(R.id.fullImageView);
+        fullImageView.setImageResource(imageId);
+
+
+        dialog.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
+
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.show();
     }
 }

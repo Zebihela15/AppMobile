@@ -1,34 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
     <!-- ScrollView chứa nội dung chính -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:layout_marginBottom="56dp"> <!-- Khoảng trống cho BottomNavigationView -->
+        android:focusableInTouchMode="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bookingButton">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
-            <!-- Ảnh nhà hàng (Tràn viền hoàn toàn) -->
+            <!-- Ảnh nhà hàng -->
             <ImageView
                 android:id="@+id/restaurantImage"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/d15"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintWidth_percent="1.0" />
 
             <!-- Tên nhà hàng -->
             <TextView
@@ -43,7 +47,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="16dp" />
 
-            <!-- Địa chỉ với icon -->
+            <!-- Logo location và địa chỉ -->
             <ImageView
                 android:id="@+id/locationIcon"
                 android:layout_width="24dp"
@@ -57,7 +61,7 @@
                 android:id="@+id/restaurantAddress"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="15A Hồ Văn Huê, Phường 9, Phú Nhuận, TP.HCM"
+                android:text="15A Hồ Văn Huê, Phường 9, Phú Nhuận, Thành phố Hồ Chí Minh"
                 android:textSize="16sp"
                 android:layout_marginStart="8dp"
                 app:layout_constraintTop_toBottomOf="@id/restaurantName"
@@ -65,7 +69,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginTop="8dp" />
 
-            <!-- Giá tiền với icon -->
             <ImageView
                 android:id="@+id/moneyIcon"
                 android:layout_width="24dp"
@@ -88,93 +91,114 @@
                 android:layout_marginTop="8dp" />
 
             <!-- Thanh điều hướng ngang -->
-            <HorizontalScrollView
-                android:id="@+id/horizontalScrollView"
-                android:layout_width="match_parent"
+
+            <!-- Nội dung tương ứng -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
-                app:layout_constraintTop_toBottomOf="@id/price"
-                android:layout_marginTop="16dp">
+                android:text="Giới thiệu"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/price" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btnIntro"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Giới Thiệu"
-                        android:onClick="scrollToIntro" />
-
-                    <Button
-                        android:id="@+id/btnMenu"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Thực Đơn"
-                        android:onClick="scrollToMenu" />
-
-                    <Button
-                        android:id="@+id/btnGallery"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Thư Viện Ảnh"
-                        android:onClick="scrollToGallery" />
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <!-- Nội dung giới thiệu -->
             <TextView
                 android:id="@+id/introSection"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="DiamondPlace là nhà hàng tiệc cưới..."
                 android:ellipsize="end"
                 android:maxLines="2"
-                app:layout_constraintTop_toBottomOf="@id/horizontalScrollView"
+                android:text="DiamondPlace là nhà hàng tiệc cưới ......."
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <Button
+                android:id="@+id/btnSeeMore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xem thêm"
+                android:background="@android:color/white"
+                android:textColor="@color/black"
+                android:padding="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintTop_toBottomOf="@id/introSection"
+                app:layout_constraintStart_toStartOf="parent"
+                android:backgroundTint="@android:color/white"
+                android:onClick="toggleIntro"/>
+
+            <!-- Tiêu đề Ảnh của nhà hàng -->
+            <TextView
+                android:id="@+id/galleryTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ảnh của nhà hàng"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/btnSeeMore"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"/>
+
+            <!-- RecyclerView Thư viện ảnh -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/gallerySection"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/galleryTitle"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="8dp"/>
 
+            <!-- Tiêu đề Menu -->
+            <TextView
+                android:id="@+id/menuTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Menu"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/gallerySection"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"/>
+
+            <!-- RecyclerView Menu -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/menuSection"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/introSection"
+                app:layout_constraintTop_toBottomOf="@id/menuTitle"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="8dp"/>
 
-            <TextView
-                android:id="@+id/gallerySection"
-                android:layout_width="0dp"
-                android:layout_height="200dp"
-                android:text="Thư viện ảnh của nhà hàng"
-                app:layout_constraintTop_toBottomOf="@id/menuSection"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="16dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Nút đặt tiệc -->
+    <!-- Nút Đặt tiệc ngay -->
     <Button
         android:id="@+id/bookingButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Đặt tiệc ngay"
         android:backgroundTint="@color/red"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:onClick="onBookingButtonClick" />
 
-    <!-- BottomNavigationView -->
+    <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:menu="@menu/botom_navigation" />
+        android:background="?android:attr/windowBackground"
+        android:elevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:menu="@menu/botom_navigation"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
