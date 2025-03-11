@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Userdatabase.db";
-    private static final int DATABASE_VERSION = 4; // Tăng từ 3 lên 4 để thêm các bảng mới
+    private static final int DATABASE_VERSION = 5; // Tăng từ 4 lên 5 để thêm bảng mới
 
     // Bảng users
     private static final String TABLE_USERS = "users";
@@ -29,19 +29,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_DESCRIPTION = "description";
     private static final String COLUMN_IMAGE = "image";
 
-    // Bảng menus (mới)
+    // Bảng menus
     private static final String TABLE_MENUS = "menus";
     private static final String COLUMN_MENU_ID = "id";
     private static final String COLUMN_MENU_TITLE = "title";
     private static final String COLUMN_MENU_PRICE = "price";
 
-    // Bảng services (mới)
+    // Bảng services
     private static final String TABLE_SERVICES = "services";
     private static final String COLUMN_SERVICE_ID = "id";
     private static final String COLUMN_SERVICE_TITLE = "title";
     private static final String COLUMN_SERVICE_PRICE = "price";
 
-    // Bảng bookings (mới)
+    // Bảng bookings
     private static final String TABLE_BOOKINGS = "bookings";
     private static final String COLUMN_BOOKING_ID = "id";
     private static final String COLUMN_BOOKING_USER_ID = "user_id";
@@ -52,11 +52,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_BOOKING_MENU_ID = "menu_id";
     private static final String COLUMN_BOOKING_TOTAL_PRICE = "total_price";
 
-    // Bảng booking_services (mới)
+    // Bảng booking_services
     private static final String TABLE_BOOKING_SERVICES = "booking_services";
     private static final String COLUMN_BS_ID = "id";
     private static final String COLUMN_BS_BOOKING_ID = "booking_id";
     private static final String COLUMN_BS_SERVICE_ID = "service_id";
+
+    // Bảng dishes (mới)
+    private static final String TABLE_DISHES = "dishes";
+    private static final String COLUMN_DISH_ID = "id";
+    private static final String COLUMN_DISH_TITLE = "title";
+    private static final String COLUMN_DISH_PRICE = "price";
+
+    // Bảng ThanhToan (mới)
+    private static final String TABLE_THANHTOAN = "thanhtoan";
+    private static final String COLUMN_TT_ID = "MaThanhToan";
+    private static final String COLUMN_TT_HOTEN = "HoTen";
+    private static final String COLUMN_TT_EMAIL = "Email";
+    private static final String COLUMN_TT_SODIENTHOAI = "SoDienThoai";
+    private static final String COLUMN_TT_SOLUONGBAN = "SoLuongBan";
+    private static final String COLUMN_TT_NGAYDATTIEC = "NgayDatTiec";
+    private static final String COLUMN_TT_GHICHU = "GhiChu";
+    private static final String COLUMN_TT_TONGTIEN = "TongTien";
+    private static final String COLUMN_TT_PHUONGTHUC = "PhuongThucThanhToan";
+    private static final String COLUMN_TT_SOTIENDATHANHTOAN = "SoTienDaThanhToan";
+    private static final String COLUMN_TT_TRANGTHAI = "TrangThaiThanhToan";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -85,7 +105,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String CREATE_MENUS_TABLE = "CREATE TABLE " + TABLE_MENUS + " (" +
                 COLUMN_MENU_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_MENU_TITLE + " TEXT, " +
-                COLUMN_MENU_PRICE + " REAL)"; // REAL để lưu giá tiền dạng số thực
+                COLUMN_MENU_PRICE + " REAL)";
         db.execSQL(CREATE_MENUS_TABLE);
 
         // Tạo bảng services
@@ -119,22 +139,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COLUMN_BS_SERVICE_ID + ") REFERENCES " + TABLE_SERVICES + "(" + COLUMN_SERVICE_ID + "))";
         db.execSQL(CREATE_BOOKING_SERVICES_TABLE);
 
+        // Tạo bảng dishes
+        String CREATE_DISHES_TABLE = "CREATE TABLE " + TABLE_DISHES + " (" +
+                COLUMN_DISH_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_DISH_TITLE + " TEXT, " +
+                COLUMN_DISH_PRICE + " REAL)";
+        db.execSQL(CREATE_DISHES_TABLE);
+
+        // Tạo bảng ThanhToan
+        String CREATE_THANHTOAN_TABLE = "CREATE TABLE " + TABLE_THANHTOAN + " (" +
+                COLUMN_TT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_TT_HOTEN + " TEXT, " +
+                COLUMN_TT_EMAIL + " TEXT, " +
+                COLUMN_TT_SODIENTHOAI + " TEXT, " +
+                COLUMN_TT_SOLUONGBAN + " INTEGER, " +
+                COLUMN_TT_NGAYDATTIEC + " TEXT, " +
+                COLUMN_TT_GHICHU + " TEXT, " +
+                COLUMN_TT_TONGTIEN + " REAL, " +
+                COLUMN_TT_PHUONGTHUC + " TEXT, " +
+                COLUMN_TT_SOTIENDATHANHTOAN + " REAL, " +
+                COLUMN_TT_TRANGTHAI + " TEXT)";
+        db.execSQL(CREATE_THANHTOAN_TABLE);
+
         // Thêm dữ liệu ban đầu
         insertInitialRestaurants(db);
         insertInitialMenus(db);
         insertInitialServices(db);
+        insertInitialDishes(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 4) {
-            // Xóa các bảng cũ và tạo lại nếu version nhỏ hơn 4
+        if (oldVersion < 5) {  // Cập nhật điều kiện để bao gồm version mới
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_RESTAURANTS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MENUS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SERVICES);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKING_SERVICES);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_DISHES);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_THANHTOAN);
             onCreate(db);
         }
     }
@@ -179,6 +223,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_SERVICE_TITLE, title);
         values.put(COLUMN_SERVICE_PRICE, price);
         db.insert(TABLE_SERVICES, null, values);
+    }
+
+    // Thêm dữ liệu ban đầu cho bảng dishes
+    private void insertInitialDishes(SQLiteDatabase db) {
+        insertDish(db, "Salad Xá Xíu Rau Mùa Sốt Mè Rang", 450000);
+        insertDish(db, "Súp Gà Hầm Nấm đông cô", 550000);
+        insertDish(db, "Cá Điêu Hồng Hấp Tàu Xì", 750000);
+        insertDish(db, "Sườn Non Hầm Pate Pháp-Bánh Mì", 680000);
+        insertDish(db, "Cải Thìa Sốt Nấm Kim Châm", 450000);
+        insertDish(db, "Cơm Chiên Hạnh Phúc", 600000);
+        insertDish(db, "Rau Câu Sữa", 200000);
+        insertDish(db, "Gỏi Bò Mỹ Vị Chua Cay", 600000);
+        insertDish(db, "Súp Bong Bóng Cá Tam Tơ", 750000);
+        insertDish(db, "Bacon Cuộn Tôm Nướng Sốt BBQ-Bánh Bao", 900000);
+        insertDish(db, "Bắp Bò Hầm Rượu Vang-Bánh mì", 850000);
+        insertDish(db, "Lẩu Bao Tử Hầm Tiêu Xanh-Bún Tươi", 1200000);
+        insertDish(db, "Chè Nha Đam Ngũ sắc", 300000);
+    }
+
+    private void insertDish(SQLiteDatabase db, String title, double price) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DISH_TITLE, title);
+        values.put(COLUMN_DISH_PRICE, price);
+        db.insert(TABLE_DISHES, null, values);
     }
 
     // Lấy tất cả nhà hàng
@@ -350,7 +418,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long bookingId = db.insert(TABLE_BOOKINGS, null, values);
         db.close();
-        return bookingId; // Trả về ID của booking vừa thêm
+        return bookingId;
     }
 
     // Phương thức thêm dịch vụ vào booking
@@ -401,7 +469,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return serviceList;
     }
 
-    // Lớp User để lưu thông tin người dùng
+    // Lấy tất cả món ăn
+    public List<Dish> getAllDishes() {
+        List<Dish> dishList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_DISHES, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DISH_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DISH_TITLE));
+                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_DISH_PRICE));
+                dishList.add(new Dish(id, title, price));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return dishList;
+    }
+
+    // Thêm một thanh toán mới
+    public long addThanhToan(String hoTen, String email, String soDienThoai, int soLuongBan,
+                             String ngayDatTiec, String ghiChu, double tongTien,
+                             String phuongThucThanhToan, double soTienDaThanhToan, String trangThaiThanhToan) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_TT_HOTEN, hoTen);
+        values.put(COLUMN_TT_EMAIL, email);
+        values.put(COLUMN_TT_SODIENTHOAI, soDienThoai);
+        values.put(COLUMN_TT_SOLUONGBAN, soLuongBan);
+        values.put(COLUMN_TT_NGAYDATTIEC, ngayDatTiec);
+        values.put(COLUMN_TT_GHICHU, ghiChu);
+        values.put(COLUMN_TT_TONGTIEN, tongTien);
+        values.put(COLUMN_TT_PHUONGTHUC, phuongThucThanhToan);
+        values.put(COLUMN_TT_SOTIENDATHANHTOAN, soTienDaThanhToan);
+        values.put(COLUMN_TT_TRANGTHAI, trangThaiThanhToan);
+
+        long id = db.insert(TABLE_THANHTOAN, null, values);
+        db.close();
+        return id;
+    }
+
+    // Lớp User
     public static class User {
         private int id;
         private String name;
@@ -473,5 +581,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public int getId() { return id; }
         public String getTitle() { return title; }
         public double getPrice() { return price; }
+    }
+
+    // Lớp Dish
+    public static class Dish {
+        private int id;
+        private String title;
+        private double price;
+
+        public Dish(int id, String title, double price) {
+            this.id = id;
+            this.title = title;
+            this.price = price;
+        }
+
+        public int getId() { return id; }
+        public String getTitle() { return title; }
+        public double getPrice() { return price; }
+    }
+
+    // Lớp ThanhToan
+    public static class ThanhToan {
+        private int maThanhToan;
+        private String hoTen;
+        private String email;
+        private String soDienThoai;
+        private int soLuongBan;
+        private String ngayDatTiec;
+        private String ghiChu;
+        private double tongTien;
+        private String phuongThucThanhToan;
+        private double soTienDaThanhToan;
+        private String trangThaiThanhToan;
+
+        public ThanhToan(int maThanhToan, String hoTen, String email, String soDienThoai,
+                         int soLuongBan, String ngayDatTiec, String ghiChu, double tongTien,
+                         String phuongThucThanhToan, double soTienDaThanhToan, String trangThaiThanhToan) {
+            this.maThanhToan = maThanhToan;
+            this.hoTen = hoTen;
+            this.email = email;
+            this.soDienThoai = soDienThoai;
+            this.soLuongBan = soLuongBan;
+            this.ngayDatTiec = ngayDatTiec;
+            this.ghiChu = ghiChu;
+            this.tongTien = tongTien;
+            this.phuongThucThanhToan = phuongThucThanhToan;
+            this.soTienDaThanhToan = soTienDaThanhToan;
+            this.trangThaiThanhToan = trangThaiThanhToan;
+        }
+
+        public int getMaThanhToan() { return maThanhToan; }
+        public String getHoTen() { return hoTen; }
+        public String getEmail() { return email; }
+        public String getSoDienThoai() { return soDienThoai; }
+        public int getSoLuongBan() { return soLuongBan; }
+        public String getNgayDatTiec() { return ngayDatTiec; }
+        public String getGhiChu() { return ghiChu; }
+        public double getTongTien() { return tongTien; }
+        public String getPhuongThucThanhToan() { return phuongThucThanhToan; }
+        public double getSoTienDaThanhToan() { return soTienDaThanhToan; }
+        public String getTrangThaiThanhToan() { return trangThaiThanhToan; }
     }
 }
