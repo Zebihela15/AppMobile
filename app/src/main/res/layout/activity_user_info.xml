@@ -103,6 +103,24 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Thêm mục Thông tin đơn đặt tiệc -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:layout_margin="8dp">
+
+            <TextView
+                android:id="@+id/tvBookingInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="Thông tin đơn đặt tiệc"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+        </androidx.cardview.widget.CardView>
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

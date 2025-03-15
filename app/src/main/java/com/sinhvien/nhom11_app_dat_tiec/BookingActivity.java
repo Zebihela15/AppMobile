@@ -1,8 +1,10 @@
 package com.sinhvien.nhom11_app_dat_tiec;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -50,8 +52,7 @@ public class BookingActivity extends AppCompatActivity {
         setupTimeSpinner();
         updateTotalPrice();
 
-        // Lấy restaurantId từ Intent (giả sử bạn truyền nó từ activity trước)
-        restaurantId = getIntent().getIntExtra("restaurant_id", 1); // Mặc định là 1 nếu không có
+        restaurantId = getIntent().getIntExtra("restaurant_id", 1);
         tvRestaurantName.setText(getIntent().getStringExtra("restaurant_name"));
         ivRestaurant.setImageResource(getIntent().getIntExtra("restaurant_image", R.drawable.dtc1));
     }
@@ -72,11 +73,16 @@ public class BookingActivity extends AppCompatActivity {
         ivRestaurant = findViewById(R.id.ivRestaurant);
         tvRestaurantName = findViewById(R.id.tvRestaurantName);
 
+        Log.d("BookingActivity", "rgMenu is null: " + (rgMenu == null));
+
         View.OnClickListener priceListener = v -> updateTotalPrice();
         cbService1.setOnClickListener(priceListener);
         cbService2.setOnClickListener(priceListener);
         cbService3.setOnClickListener(priceListener);
-        rgMenu.setOnCheckedChangeListener((group, checkedId) -> updateTotalPrice());
+        rgMenu.setOnCheckedChangeListener((group, checkedId) -> {
+            Log.d("BookingActivity", "RadioGroup checked ID: " + checkedId);
+            updateTotalPrice();
+        });
     }
 
     private void loadUserInfo() {
@@ -109,7 +115,7 @@ public class BookingActivity extends AppCompatActivity {
                 etTableCount.setText(String.valueOf(tableCount));
                 updateTotalPrice();
             } else {
-                showToast("Số bàn tối thiểu là 1");
+                showToast("Số bàn tối thiểu là 5");
             }
         });
 
@@ -125,27 +131,27 @@ public class BookingActivity extends AppCompatActivity {
         spinnerTime.setAdapter(adapter);
     }
 
-    private long calculateTotalPrice() {
-        long total = 0;
+    private double calculateTotalPrice() { // Giữ double để đồng bộ với các activity khác
+        double total = 0;
 
         int selectedMenuId = rgMenu.getCheckedRadioButtonId();
         if (selectedMenuId == R.id.rbMenu1) {
-            total += tableCount * 3550000; // Menu 1
+            total += tableCount * 3550000.0; // Menu 1
         } else if (selectedMenuId == R.id.rbMenu2) {
-            total += tableCount * 5000000; // Menu 2
+            total += tableCount * 5000000.0; // Menu 2
         }
 
-        if (cbService1.isChecked()) total += 100000;
-        if (cbService2.isChecked()) total += 150000;
-        if (cbService3.isChecked()) total += 200000;
+        if (cbService1.isChecked()) total += 100000.0;
+        if (cbService2.isChecked()) total += 150000.0;
+        if (cbService3.isChecked()) total += 200000.0;
 
         return total;
     }
 
     private void updateTotalPrice() {
-        long total = calculateTotalPrice();
+        double total = calculateTotalPrice();
         if (tvTotalPrice != null) {
-            tvTotalPrice.setText(String.format("Tổng cộng: %,d VNĐ", total));
+            tvTotalPrice.setText(String.format("Tổng cộng: %,d VNĐ", (long) total));
         }
     }
 
@@ -155,48 +161,77 @@ public class BookingActivity extends AppCompatActivity {
         String email = etEmail.getText().toString().trim();
         String time = spinnerTime.getSelectedItem().toString();
         int menuId = getSelectedMenuId();
-        double totalPrice = calculateTotalPrice();
+        double totalPrice = calculateTotalPrice(); // Dùng double để đồng bộ
 
-        if (!validateInput(fullName, phone, email)) return;
+        // Sử dụng validateInput như code cũ
+        if (!validateInput(fullName, phone, email)) {
+            Log.d("BookingActivity", "Validation failed");
+            return;
+        }
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String userEmail = sharedPreferences.getString("user_email", null);
         if (userEmail == null) {
             showToast("Không tìm thấy thông tin người dùng");
+            Log.d("BookingActivity", "User email not found in SharedPreferences");
             return;
         }
 
         DatabaseHelper.User user = dbHelper.getUserInfo(userEmail);
         if (user == null) {
             showToast("Không tìm thấy thông tin người dùng");
+            Log.d("BookingActivity", "User not found in database for email: " + userEmail);
             return;
         }
 
         int userId = user.getId();
+        Log.d("BookingActivity", "User ID: " + userId);
 
-        // Thêm booking
         long bookingId = dbHelper.addBooking(
-                userId, restaurantId, tableCount, selectedDate, time,
-                menuId, totalPrice
+                userId, restaurantId, tableCount, selectedDate, time, menuId, totalPrice
         );
+        Log.d("BookingActivity", "Booking ID: " + bookingId);
 
         if (bookingId != -1) {
-            // Thêm các dịch vụ đã chọn
-            if (cbService1.isChecked()) dbHelper.addBookingService(bookingId, 1); // Giả sử ID dịch vụ 1 là 1
-            if (cbService2.isChecked()) dbHelper.addBookingService(bookingId, 2); // Giả sử ID dịch vụ 2 là 2
-            if (cbService3.isChecked()) dbHelper.addBookingService(bookingId, 3); // Giả sử ID dịch vụ 3 là 3
+            boolean servicesAdded = true;
+            if (cbService1.isChecked()) servicesAdded &= dbHelper.addBookingService(bookingId, 1);
+            if (cbService2.isChecked()) servicesAdded &= dbHelper.addBookingService(bookingId, 2);
+            if (cbService3.isChecked()) servicesAdded &= dbHelper.addBookingService(bookingId, 3);
+
+            if (!servicesAdded) {
+                showToast("Lỗi khi thêm dịch vụ, nhưng booking đã được lưu");
+                Log.d("BookingActivity", "Failed to add some services");
+            }
 
             showBookingSuccessMessage(fullName, phone, email, time, selectedMenuIdToString(), getSelectedServices(), totalPrice);
+
+            Intent intent = new Intent(BookingActivity.this, PaymentActivity.class);
+            intent.putExtra("booking_id", bookingId);
+            intent.putExtra("full_name", fullName);
+            intent.putExtra("phone", phone);
+            intent.putExtra("email", email);
+            intent.putExtra("date", selectedDate);
+            intent.putExtra("time", time);
+            intent.putExtra("table_count", tableCount);
+            intent.putExtra("menu", selectedMenuIdToString());
+            intent.putExtra("restaurant_name", tvRestaurantName.getText().toString());
+            intent.putStringArrayListExtra("services", getSelectedServices());
+            intent.putExtra("total_price", totalPrice);
+
+            Log.d("BookingActivity", "Starting PaymentActivity with booking ID: " + bookingId);
+            startActivity(intent);
             resetForm();
         } else {
             showToast("Đặt tiệc thất bại, vui lòng thử lại");
+            Log.d("BookingActivity", "Failed to add booking to database");
         }
     }
 
     private int getSelectedMenuId() {
         int selectedId = rgMenu.getCheckedRadioButtonId();
-        if (selectedId == R.id.rbMenu1) return 1; // Giả sử ID của Menu 1 là 1
-        if (selectedId == R.id.rbMenu2) return 2; // Giả sử ID của Menu 2 là 2
+        Log.d("BookingActivity", "getSelectedMenuId: " + selectedId);
+        if (selectedId == R.id.rbMenu1) return 1;
+        if (selectedId == R.id.rbMenu2) return 2;
         return -1;
     }
 
@@ -232,8 +267,12 @@ public class BookingActivity extends AppCompatActivity {
             showToast("Số điện thoại không hợp lệ");
             return false;
         }
-        if (rgMenu.getCheckedRadioButtonId() == -1) {
-            showToast("Vui lòng chọn menu");
+
+        RadioButton rbMenu1 = findViewById(R.id.rbMenu1);
+        RadioButton rbMenu2 = findViewById(R.id.rbMenu2);
+        if (!rbMenu1.isChecked() && !rbMenu2.isChecked()) {
+            Log.d("BookingActivity", "No menu selected: rbMenu1=" + rbMenu1.isChecked() + ", rbMenu2=" + rbMenu2.isChecked());
+            showToast("Vui lòng chọn 1 trong 2 menu");
             return false;
         }
         return true;
@@ -241,12 +280,12 @@ public class BookingActivity extends AppCompatActivity {
 
     private void showBookingSuccessMessage(String fullName, String phone, String email,
                                            String time, String menu, ArrayList<String> services,
-                                           double totalPrice) {
+                                           double totalPrice) { // Dùng double
         String message = String.format(
                 "Đặt tiệc thành công!\nSố bàn: %d\nNgày: %s\nGiờ: %s\n" +
                         "Họ tên: %s\nSĐT: %s\nEmail: %s\nMenu: %s\nDịch vụ: %s\nTổng: %,d VNĐ",
                 tableCount, selectedDate, time, fullName, phone, email,
-                menu, services.toString(), totalPrice
+                menu, services.toString(), (long) totalPrice
         );
         showToast(message, Toast.LENGTH_LONG);
     }
