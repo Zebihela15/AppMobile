@@ -24,7 +24,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-
         <LinearLayout
             android:id="@+id/bookingSection"
             android:layout_width="0dp"
@@ -34,164 +33,184 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Số bàn -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Số bàn(10 người/bàn)"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
+            <LinearLayout
+                android:id="@+id/restaurantSelection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chọn nhà hàng"
+                    android:textSize="18sp"
+                    android:layout_marginBottom="8dp"/>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnDecrease"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:text="-"
-                android:textSize="24sp"
-                android:backgroundTint="@color/red"
-                android:textColor="@color/white"
-                android:gravity="center"/>
+                <Spinner
+                    android:id="@+id/spinnerRestaurant"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
 
-            <EditText
-                android:id="@+id/etTableCount"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:inputType="number"
-                android:text="5"
-                android:gravity="center"
+            <!-- Số bàn -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Số bàn(10 người/bàn)"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnDecrease"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="-"
+                    android:textSize="24sp"
+                    android:backgroundTint="@color/red"
+                    android:textColor="@color/white"
+                    android:gravity="center"/>
+
+                <EditText
+                    android:id="@+id/etTableCount"
+                    android:layout_width="100dp"
+                    android:layout_height="48dp"
+                    android:inputType="number"
+                    android:text="5"
+                    android:gravity="center"
+                    android:textSize="18sp"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnIncrease"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="+"
+                    android:textSize="24sp"
+                    android:backgroundTint="@color/red"
+                    android:textColor="@color/white"
+                    android:gravity="center"/>
+            </LinearLayout>
+
+            <!-- Ngày đặt tiệc -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ngày đặt tiệc"
+                android:textSize="18sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btnSelectDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chọn ngày"
                 android:textSize="18sp"/>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnIncrease"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:text="+"
-                android:textSize="24sp"
-                android:backgroundTint="@color/red"
-                android:textColor="@color/white"
-                android:gravity="center"/>
-        </LinearLayout>
-
-        <!-- Ngày đặt tiệc -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ngày đặt tiệc"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
-
-        <Button
-            android:id="@+id/btnSelectDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chọn ngày"
-            android:textSize="18sp"/>
-
-        <!-- Giờ đặt tiệc -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Giờ đặt tiệc"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
-
-        <Spinner
-            android:id="@+id/spinnerTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <!-- Phần chọn dịch vụ -->
-    <LinearLayout
-        android:id="@+id/serviceSection"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/bookingSection"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chọn dịch vụ"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
-
-        <!-- Dịch vụ 1 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <CheckBox
-                android:id="@+id/cbService1"
+            <!-- Giờ đặt tiệc -->
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trang trí bánh kem"/>
+                android:text="Giờ đặt tiệc"
+                android:textSize="18sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="100.000 VNĐ"
-                android:textSize="16sp"
-                android:layout_weight="1"
-                android:gravity="end"/>
+            <Spinner
+                android:id="@+id/spinnerTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
-
+        <!-- Phần chọn dịch vụ -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/serviceSection"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/bookingSection"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <CheckBox
-                android:id="@+id/cbService2"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trang tri gia tiên"/>
+                android:text="Chọn dịch vụ"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"/>
 
-            <TextView
-                android:layout_width="0dp"
+            <!-- Dịch vụ 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="150.000 VNĐ"
-                android:textSize="16sp"
-                android:layout_weight="1"
-                android:gravity="end"/>
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <CheckBox
+                    android:id="@+id/cbService1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trang trí bánh kem"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="100.000 VNĐ"
+                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:gravity="end"/>
+            </LinearLayout>
+
+            <!-- Dịch vụ 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <CheckBox
+                    android:id="@+id/cbService2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trang tri gia tiên"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="150.000 VNĐ"
+                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:gravity="end"/>
+            </LinearLayout>
+
+            <!-- Dịch vụ 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <CheckBox
+                    android:id="@+id/cbService3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trang trí sảnh cuoi"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="200.000 VNĐ"
+                    android:textSize="16sp"
+                    android:layout_weight="1"
+                    android:gravity="end"/>
+            </LinearLayout>
         </LinearLayout>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <CheckBox
-                android:id="@+id/cbService3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Trang trí sảnh cuoi"/>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="200.000 VNĐ"
-                android:textSize="16sp"
-                android:layout_weight="1"
-                android:gravity="end"/>
-        </LinearLayout>
-    </LinearLayout>
 
         <!-- Phần chọn menu -->
         <LinearLayout
@@ -201,15 +220,15 @@
             android:orientation="vertical"
             android:layout_marginTop="24dp"
             app:layout_constraintTop_toBottomOf="@id/serviceSection"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chọn menu"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chọn menu"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"/>
 
             <RadioGroup
                 android:id="@+id/rgMenu"
@@ -218,19 +237,19 @@
                 android:orientation="vertical">
 
                 <!-- Menu 1 -->
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="8dp">
+                    android:padding="8dp">
 
                     <RadioButton
                         android:id="@+id/rbMenu1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Menu 1 - Giá: 3.550.000đ"
-                        android:textSize="16sp"/>
-
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -238,24 +257,26 @@
                         android:text="Gồm: Bò bít tết, Gà nướng, Salad, Canh hải sản"
                         android:textSize="14sp"
                         android:textColor="@android:color/darker_gray"
-                        android:layout_marginStart="24dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/rbMenu1"
+                        android:layout_marginStart="40dp"
                         android:layout_marginTop="4dp"/>
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <!-- Menu 2 -->
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="8dp">
+                    android:padding="8dp">
 
                     <RadioButton
                         android:id="@+id/rbMenu2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Menu 2 - Giá: 5.000.000đ"
-                        android:textSize="16sp"/>
-
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -263,108 +284,83 @@
                         android:text="Gồm: Tôm hùm nướng, Bò Wagyu, Súp cua, Rau củ nướng"
                         android:textSize="14sp"
                         android:textColor="@android:color/darker_gray"
-                        android:layout_marginStart="24dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/rbMenu2"
+                        android:layout_marginStart="40dp"
                         android:layout_marginTop="4dp"/>
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
             </RadioGroup>
-    </LinearLayout>
 
-    <!-- Phần thông tin người đặt -->
-    <LinearLayout
-        android:id="@+id/userInfoSection"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/menuSection"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Thông tin người đặt"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"/>
-
-        <!-- Họ tên -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Họ tên"
-            android:textSize="16sp"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:id="@+id/etFullName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nhập họ tên"
-            android:inputType="textPersonName"/>
-
-        <!-- Số điện thoại -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Số điện thoại"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:id="@+id/etPhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nhập số điện thoại"
-            android:inputType="phone"/>
-
-        <!-- Email -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"/>
-
-        <EditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nhập email"
-            android:inputType="textEmailAddress"/>
-    </LinearLayout>
-
-    <!-- Phần thông tin quán -->
-    <LinearLayout
-        android:id="@+id/restaurantInfoSection"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/userInfoSection"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <!-- Hình ảnh quán -->
-        <ImageView
-            android:id="@+id/ivRestaurant"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/d11"
-            android:layout_marginEnd="16dp"
-            android:contentDescription="Hình ảnh quán"/>
-
-        <!-- Tên quán -->
-        <TextView
-            android:id="@+id/tvRestaurantName"
+        <!-- Phần thông tin người đặt -->
+        <LinearLayout
+            android:id="@+id/userInfoSection"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="DiamondPlace 1"
-            android:textSize="18sp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"/>
-    </LinearLayout>
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            app:layout_constraintTop_toBottomOf="@id/menuSection"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thông tin người đặt"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Họ tên -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Họ tên"
+                android:textSize="16sp"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/etFullName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nhập họ tên"
+                android:inputType="textPersonName"/>
+
+            <!-- Số điện thoại -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Số điện thoại"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nhập số điện thoại"
+                android:inputType="phone"/>
+
+            <!-- Email -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nhập email"
+                android:inputType="textEmailAddress"/>
+        </LinearLayout>
+
+
 
         <TextView
             android:id="@+id/tvTotalPrice"
@@ -375,10 +371,9 @@
             android:textStyle="bold"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"
-            app:layout_constraintTop_toBottomOf="@id/restaurantInfoSection"
+            app:layout_constraintTop_toBottomOf="@id/userInfoSection"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-
 
         <Button
             android:id="@+id/btnBook"
@@ -389,5 +384,5 @@
             app:layout_constraintTop_toBottomOf="@id/tvTotalPrice"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

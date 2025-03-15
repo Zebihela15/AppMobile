@@ -6,7 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Calendar;
+import java.util.Date;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -200,8 +206,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Thêm dữ liệu ban đầu cho bảng menus
     private void insertInitialMenus(SQLiteDatabase db) {
-        insertMenu(db, "Menu 1", 3550000);
-        insertMenu(db, "Menu 2", 5000000);
+        insertMenu(db, "Menu normal", 3550000);
+        insertMenu(db, "Menu Premium", 5000000);
     }
 
     private void insertMenu(SQLiteDatabase db, String title, double price) {
@@ -213,8 +219,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Thêm dữ liệu ban đầu cho bảng services
     private void insertInitialServices(SQLiteDatabase db) {
-        insertService(db, "Dịch vụ 1", 100000);
-        insertService(db, "Dịch vụ 2", 150000);
+        insertService(db, "Trang trí bánh kem", 100000);
+        insertService(db, "Trang tri tiec cuoi", 150000);
         insertService(db, "Dịch vụ 3", 200000);
     }
 
@@ -260,13 +266,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
                 int image = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
-                restaurantList.add(new Restaurant(image, title, description));
+                restaurantList.add(new Restaurant(id, title, description, image));
             } while (cursor.moveToNext());
         }
         cursor.close();
         db.close();
         return restaurantList;
     }
+
 
     // Tìm kiếm nhà hàng theo title
     public List<Restaurant> searchRestaurants(String query) {
@@ -281,7 +288,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
                 int image = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
-                restaurantList.add(new Restaurant(image, title, description));
+                restaurantList.add(new Restaurant(id,description, title,image));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -405,21 +412,76 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Phương thức thêm một booking mới
-    public long addBooking(int userId, int restaurantId, int tableCount, String bookingDate, String bookingTime, int menuId, double totalPrice) {
-        SQLiteDatabase db = this.getWritableDatabase();
+    public boolean addBooking(int userId, int restaurantId, int tableCount, String date, String time, int menuId, List<Integer> serviceIds, SQLiteDatabase db) {
+
+        if (tableCount < 5 || tableCount > 50) {
+            return false;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Calendar minDate = Calendar.getInstance();
+        minDate.add(Calendar.DAY_OF_MONTH, 14);
+        try {
+            Date selectedDate = sdf.parse(date);
+            if (selectedDate.before(minDate.getTime())) {
+                return false; //
+            }
+        } catch (ParseException e) {
+            return false;
+        }
+
+        List<String> validTimes = Arrays.asList("15:00", "16:00", "17:00", "18:00", "19:00", "20:00");
+        if (!validTimes.contains(time)) {
+            return false;
+        }
+
+        // Lấy giá menu
+        double menuPrice = 0;
+        Cursor menuCursor = db.rawQuery("SELECT " + COLUMN_MENU_PRICE + " FROM " + TABLE_MENUS + " WHERE " + COLUMN_MENU_ID + " = ?", new String[]{String.valueOf(menuId)});
+        if (menuCursor.moveToFirst()) {
+            menuPrice = menuCursor.getDouble(0);
+        }
+        menuCursor.close();
+
+
+        double serviceTotal = 0;
+        for (int serviceId : serviceIds) {
+            Cursor serviceCursor = db.rawQuery("SELECT price FROM " + TABLE_SERVICES + " WHERE " + COLUMN_SERVICE_ID + " = ?", new String[]{String.valueOf(serviceId)});
+            if (serviceCursor.moveToFirst()) {
+                serviceTotal += serviceCursor.getDouble(0);
+            }
+            serviceCursor.close();
+        }
+
+        // Tính tổng tiền
+        double totalPrice = (menuPrice * tableCount) + serviceTotal;
+
+        // Chèn booking vào database
         ContentValues values = new ContentValues();
         values.put(COLUMN_BOOKING_USER_ID, userId);
         values.put(COLUMN_BOOKING_RESTAURANT_ID, restaurantId);
         values.put(COLUMN_BOOKING_TABLE_COUNT, tableCount);
-        values.put(COLUMN_BOOKING_DATE, bookingDate);
-        values.put(COLUMN_BOOKING_TIME, bookingTime);
+        values.put(COLUMN_BOOKING_DATE, date);
+        values.put(COLUMN_BOOKING_TIME, time);
         values.put(COLUMN_BOOKING_MENU_ID, menuId);
         values.put(COLUMN_BOOKING_TOTAL_PRICE, totalPrice);
 
         long bookingId = db.insert(TABLE_BOOKINGS, null, values);
-        db.close();
-        return bookingId;
+        if (bookingId == -1) {
+            return false;
+        }
+
+        // Chèn dịch vụ vào booking_services
+        for (int serviceId : serviceIds) {
+            ContentValues serviceValues = new ContentValues();
+            serviceValues.put(COLUMN_BS_BOOKING_ID, bookingId);
+            serviceValues.put(COLUMN_BS_SERVICE_ID, serviceId);
+            db.insert(TABLE_BOOKING_SERVICES, null, serviceValues);
+        }
+
+        return true;
     }
+
 
     // Phương thức thêm dịch vụ vào booking
     public boolean addBookingService(long bookingId, int serviceId) {
@@ -533,20 +595,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Lớp Restaurant
-    public static class Restaurant {
-        private int image;
+    public class Restaurant {
+        private int id;
         private String title;
         private String description;
+        private int image;
 
-        public Restaurant(int image, String title, String description) {
-            this.image = image;
+        public Restaurant(int id, String title, String description, int image) {
+            this.id = id;
             this.title = title;
             this.description = description;
+            this.image = image;
         }
 
-        public int getImage() { return image; }
+        // Getter methods
+        public int getId() { return id; }
         public String getTitle() { return title; }
         public String getDescription() { return description; }
+        public int getImage() { return image; }
     }
 
     // Lớp Menu
