@@ -5,13 +5,20 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
+import android.util.Log;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Calendar;
+import java.util.Date;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Userdatabase.db";
-    private static final int DATABASE_VERSION = 6; // Tăng từ 5 lên 6 để thêm cột booking_id
+    private static final int DATABASE_VERSION = 5; // Tăng từ 4 lên 5 để thêm bảng mới
 
     // Bảng users
     private static final String TABLE_USERS = "users";
@@ -57,16 +64,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_BS_BOOKING_ID = "booking_id";
     private static final String COLUMN_BS_SERVICE_ID = "service_id";
 
-    // Bảng dishes
+    // Bảng dishes (mới)
     private static final String TABLE_DISHES = "dishes";
     private static final String COLUMN_DISH_ID = "id";
     private static final String COLUMN_DISH_TITLE = "title";
     private static final String COLUMN_DISH_PRICE = "price";
 
-    // Bảng thanhtoan
+    // Bảng ThanhToan (mới)
     private static final String TABLE_THANHTOAN = "thanhtoan";
     private static final String COLUMN_TT_ID = "MaThanhToan";
-    private static final String COLUMN_TT_BOOKING_ID = "booking_id"; // Cột mới
     private static final String COLUMN_TT_HOTEN = "HoTen";
     private static final String COLUMN_TT_EMAIL = "Email";
     private static final String COLUMN_TT_SODIENTHOAI = "SoDienThoai";
@@ -85,34 +91,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // Tạo bảng users
-        db.execSQL("CREATE TABLE " + TABLE_USERS + " (" +
+        String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_NAME + " TEXT, " +
                 COLUMN_PHONE + " TEXT, " +
                 COLUMN_EMAIL + " TEXT UNIQUE, " +
-                COLUMN_PASSWORD + " TEXT)");
+                COLUMN_PASSWORD + " TEXT)";
+        db.execSQL(CREATE_USERS_TABLE);
 
         // Tạo bảng restaurants
-        db.execSQL("CREATE TABLE " + TABLE_RESTAURANTS + " (" +
+        String CREATE_RESTAURANTS_TABLE = "CREATE TABLE " + TABLE_RESTAURANTS + " (" +
                 COLUMN_RESTAURANT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_RESTAURANT_TITLE + " TEXT, " +
                 COLUMN_DESCRIPTION + " TEXT, " +
-                COLUMN_IMAGE + " INTEGER)");
+                COLUMN_IMAGE + " INTEGER)";
+        db.execSQL(CREATE_RESTAURANTS_TABLE);
 
         // Tạo bảng menus
-        db.execSQL("CREATE TABLE " + TABLE_MENUS + " (" +
+        String CREATE_MENUS_TABLE = "CREATE TABLE " + TABLE_MENUS + " (" +
                 COLUMN_MENU_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_MENU_TITLE + " TEXT, " +
-                COLUMN_MENU_PRICE + " REAL)");
+                COLUMN_MENU_PRICE + " REAL)";
+        db.execSQL(CREATE_MENUS_TABLE);
 
         // Tạo bảng services
-        db.execSQL("CREATE TABLE " + TABLE_SERVICES + " (" +
+        String CREATE_SERVICES_TABLE = "CREATE TABLE " + TABLE_SERVICES + " (" +
                 COLUMN_SERVICE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_SERVICE_TITLE + " TEXT, " +
-                COLUMN_SERVICE_PRICE + " REAL)");
+                COLUMN_SERVICE_PRICE + " REAL)";
+        db.execSQL(CREATE_SERVICES_TABLE);
 
         // Tạo bảng bookings
-        db.execSQL("CREATE TABLE " + TABLE_BOOKINGS + " (" +
+        String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + " (" +
                 COLUMN_BOOKING_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_BOOKING_USER_ID + " INTEGER, " +
                 COLUMN_BOOKING_RESTAURANT_ID + " INTEGER, " +
@@ -123,26 +133,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_BOOKING_TOTAL_PRICE + " REAL, " +
                 "FOREIGN KEY(" + COLUMN_BOOKING_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "), " +
                 "FOREIGN KEY(" + COLUMN_BOOKING_RESTAURANT_ID + ") REFERENCES " + TABLE_RESTAURANTS + "(" + COLUMN_RESTAURANT_ID + "), " +
-                "FOREIGN KEY(" + COLUMN_BOOKING_MENU_ID + ") REFERENCES " + TABLE_MENUS + "(" + COLUMN_MENU_ID + "))");
+                "FOREIGN KEY(" + COLUMN_BOOKING_MENU_ID + ") REFERENCES " + TABLE_MENUS + "(" + COLUMN_MENU_ID + "))";
+        db.execSQL(CREATE_BOOKINGS_TABLE);
 
         // Tạo bảng booking_services
-        db.execSQL("CREATE TABLE " + TABLE_BOOKING_SERVICES + " (" +
+        String CREATE_BOOKING_SERVICES_TABLE = "CREATE TABLE " + TABLE_BOOKING_SERVICES + " (" +
                 COLUMN_BS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_BS_BOOKING_ID + " INTEGER, " +
                 COLUMN_BS_SERVICE_ID + " INTEGER, " +
                 "FOREIGN KEY(" + COLUMN_BS_BOOKING_ID + ") REFERENCES " + TABLE_BOOKINGS + "(" + COLUMN_BOOKING_ID + "), " +
-                "FOREIGN KEY(" + COLUMN_BS_SERVICE_ID + ") REFERENCES " + TABLE_SERVICES + "(" + COLUMN_SERVICE_ID + "))");
+                "FOREIGN KEY(" + COLUMN_BS_SERVICE_ID + ") REFERENCES " + TABLE_SERVICES + "(" + COLUMN_SERVICE_ID + "))";
+        db.execSQL(CREATE_BOOKING_SERVICES_TABLE);
 
         // Tạo bảng dishes
-        db.execSQL("CREATE TABLE " + TABLE_DISHES + " (" +
+        String CREATE_DISHES_TABLE = "CREATE TABLE " + TABLE_DISHES + " (" +
                 COLUMN_DISH_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_DISH_TITLE + " TEXT, " +
-                COLUMN_DISH_PRICE + " REAL)");
+                COLUMN_DISH_PRICE + " REAL)";
+        db.execSQL(CREATE_DISHES_TABLE);
 
-        // Tạo bảng thanhtoan với cột booking_id
-        db.execSQL("CREATE TABLE " + TABLE_THANHTOAN + " (" +
+        // Tạo bảng ThanhToan
+        String CREATE_THANHTOAN_TABLE = "CREATE TABLE " + TABLE_THANHTOAN + " (" +
                 COLUMN_TT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_TT_BOOKING_ID + " INTEGER, " +
                 COLUMN_TT_HOTEN + " TEXT, " +
                 COLUMN_TT_EMAIL + " TEXT, " +
                 COLUMN_TT_SODIENTHOAI + " TEXT, " +
@@ -152,40 +164,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_TT_TONGTIEN + " REAL, " +
                 COLUMN_TT_PHUONGTHUC + " TEXT, " +
                 COLUMN_TT_SOTIENDATHANHTOAN + " REAL, " +
-                COLUMN_TT_TRANGTHAI + " TEXT, " +
-                "FOREIGN KEY(" + COLUMN_TT_BOOKING_ID + ") REFERENCES " + TABLE_BOOKINGS + "(" + COLUMN_BOOKING_ID + "))");
+                COLUMN_TT_TRANGTHAI + " TEXT)";
+        db.execSQL(CREATE_THANHTOAN_TABLE);
 
         // Thêm dữ liệu ban đầu
-        insertInitialData(db);
+        insertInitialRestaurants(db);
+        insertInitialMenus(db);
+        insertInitialServices(db);
+        insertInitialDishes(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 6) {
-            // Thêm cột booking_id vào bảng thanhtoan nếu chưa có
-            try {
-                db.execSQL("ALTER TABLE " + TABLE_THANHTOAN + " ADD COLUMN " + COLUMN_TT_BOOKING_ID + " INTEGER");
-            } catch (Exception e) {
-                // Nếu không thêm được cột (do bảng không tồn tại), tạo lại bảng thanhtoan
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_THANHTOAN);
-                db.execSQL("CREATE TABLE " + TABLE_THANHTOAN + " (" +
-                        COLUMN_TT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        COLUMN_TT_BOOKING_ID + " INTEGER, " +
-                        COLUMN_TT_HOTEN + " TEXT, " +
-                        COLUMN_TT_EMAIL + " TEXT, " +
-                        COLUMN_TT_SODIENTHOAI + " TEXT, " +
-                        COLUMN_TT_SOLUONGBAN + " INTEGER, " +
-                        COLUMN_TT_NGAYDATTIEC + " TEXT, " +
-                        COLUMN_TT_GHICHU + " TEXT, " +
-                        COLUMN_TT_TONGTIEN + " REAL, " +
-                        COLUMN_TT_PHUONGTHUC + " TEXT, " +
-                        COLUMN_TT_SOTIENDATHANHTOAN + " REAL, " +
-                        COLUMN_TT_TRANGTHAI + " TEXT, " +
-                        "FOREIGN KEY(" + COLUMN_TT_BOOKING_ID + ") REFERENCES " + TABLE_BOOKINGS + "(" + COLUMN_BOOKING_ID + "))");
-            }
-        }
-        if (oldVersion < 5) {
-            // Xóa và tạo lại toàn bộ database nếu phiên bản nhỏ hơn 5
+        if (oldVersion < 5) {  // Cập nhật điều kiện để bao gồm version mới
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_RESTAURANTS);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MENUS);
@@ -198,221 +189,372 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void insertInitialData(SQLiteDatabase db) {
-        // Restaurants
-        insert(db, TABLE_RESTAURANTS, new String[]{COLUMN_RESTAURANT_TITLE, COLUMN_DESCRIPTION, COLUMN_IMAGE},
-                new Object[]{"Diamond Place 1", "Không gian thoáng đãng, dịch vụ chu đáo.", R.drawable.dtc1});
-        insert(db, TABLE_RESTAURANTS, new String[]{COLUMN_RESTAURANT_TITLE, COLUMN_DESCRIPTION, COLUMN_IMAGE},
-                new Object[]{"Tràng An Palace", "Phong cách sang trọng, chuyên nghiệp.", R.drawable.dtc2});
-        insert(db, TABLE_RESTAURANTS, new String[]{COLUMN_RESTAURANT_TITLE, COLUMN_DESCRIPTION, COLUMN_IMAGE},
-                new Object[]{"New Orient Hotel", "Địa điểm lý tưởng để tổ chức tiệc cưới.", R.drawable.dtc3});
-
-        // Menus
-        insert(db, TABLE_MENUS, new String[]{COLUMN_MENU_TITLE, COLUMN_MENU_PRICE}, new Object[]{"Menu 1", 3550000});
-        insert(db, TABLE_MENUS, new String[]{COLUMN_MENU_TITLE, COLUMN_MENU_PRICE}, new Object[]{"Menu 2", 5000000});
-
-        // Services
-        insert(db, TABLE_SERVICES, new String[]{COLUMN_SERVICE_TITLE, COLUMN_SERVICE_PRICE}, new Object[]{"Dịch vụ 1", 100000});
-        insert(db, TABLE_SERVICES, new String[]{COLUMN_SERVICE_TITLE, COLUMN_SERVICE_PRICE}, new Object[]{"Dịch vụ 2", 150000});
-        insert(db, TABLE_SERVICES, new String[]{COLUMN_SERVICE_TITLE, COLUMN_SERVICE_PRICE}, new Object[]{"Dịch vụ 3", 200000});
-
-        // Dishes
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Salad Xá Xíu Rau Mùa Sốt Mè Rang", 450000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Súp Gà Hầm Nấm đông cô", 550000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Cá Điêu Hồng Hấp Tàu Xì", 750000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Sườn Non Hầm Pate Pháp-Bánh Mì", 680000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Cải Thìa Sốt Nấm Kim Châm", 450000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Cơm Chiên Hạnh Phúc", 600000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Rau Câu Sữa", 200000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Gỏi Bò Mỹ Vị Chua Cay", 600000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Súp Bong Bóng Cá Tam Tơ", 750000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Bacon Cuộn Tôm Nướng Sốt BBQ-Bánh Bao", 900000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Bắp Bò Hầm Rượu Vang-Bánh mì", 850000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Lẩu Bao Tử Hầm Tiêu Xanh-Bún Tươi", 1200000});
-        insert(db, TABLE_DISHES, new String[]{COLUMN_DISH_TITLE, COLUMN_DISH_PRICE}, new Object[]{"Chè Nha Đam Ngũ sắc", 300000});
+    // Thêm dữ liệu ban đầu cho bảng restaurants
+    private void insertInitialRestaurants(SQLiteDatabase db) {
+        insertRestaurant(db, "Diamond Place 1", "Không gian thoáng đãng, dịch vụ chu đáo.", R.drawable.dtc1);
+        insertRestaurant(db, "Tràng An Palace", "Phong cách sang trọng, chuyên nghiệp.", R.drawable.dtc2);
+        insertRestaurant(db, "New Orient Hotel", "Địa điểm lý tưởng để tổ chức tiệc cưới.", R.drawable.dtc3);
     }
 
-    private void insert(SQLiteDatabase db, String table, String[] columns, Object[] values) {
-        ContentValues contentValues = new ContentValues();
-        for (int i = 0; i < columns.length; i++) {
-            if (values[i] instanceof Integer) contentValues.put(columns[i], (Integer) values[i]);
-            else if (values[i] instanceof Double) contentValues.put(columns[i], (Double) values[i]);
-            else contentValues.put(columns[i], String.valueOf(values[i]));
-        }
-        db.insert(table, null, contentValues);
+    private void insertRestaurant(SQLiteDatabase db, String title, String description, int image) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_RESTAURANT_TITLE, title);
+        values.put(COLUMN_DESCRIPTION, description);
+        values.put(COLUMN_IMAGE, image);
+        db.insert(TABLE_RESTAURANTS, null, values);
     }
 
-    // --- Các phương thức CRUD ---
+    // Thêm dữ liệu ban đầu cho bảng menus
+    private void insertInitialMenus(SQLiteDatabase db) {
+        insertMenu(db, "Menu normal", 3550000);
+        insertMenu(db, "Menu Premium", 5000000);
+    }
 
+    private void insertMenu(SQLiteDatabase db, String title, double price) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_MENU_TITLE, title);
+        values.put(COLUMN_MENU_PRICE, price);
+        db.insert(TABLE_MENUS, null, values);
+    }
+
+    // Thêm dữ liệu ban đầu cho bảng services
+    private void insertInitialServices(SQLiteDatabase db) {
+        insertService(db, "Trang trí bánh kem", 100000);
+        insertService(db, "Trang tri tiec cuoi", 150000);
+        insertService(db, "Dịch vụ 3", 200000);
+    }
+
+    private void insertService(SQLiteDatabase db, String title, double price) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_SERVICE_TITLE, title);
+        values.put(COLUMN_SERVICE_PRICE, price);
+        db.insert(TABLE_SERVICES, null, values);
+    }
+
+    // Thêm dữ liệu ban đầu cho bảng dishes
+    private void insertInitialDishes(SQLiteDatabase db) {
+        insertDish(db, "Salad Xá Xíu Rau Mùa Sốt Mè Rang", 450000);
+        insertDish(db, "Súp Gà Hầm Nấm đông cô", 550000);
+        insertDish(db, "Cá Điêu Hồng Hấp Tàu Xì", 750000);
+        insertDish(db, "Sườn Non Hầm Pate Pháp-Bánh Mì", 680000);
+        insertDish(db, "Cải Thìa Sốt Nấm Kim Châm", 450000);
+        insertDish(db, "Cơm Chiên Hạnh Phúc", 600000);
+        insertDish(db, "Rau Câu Sữa", 200000);
+        insertDish(db, "Gỏi Bò Mỹ Vị Chua Cay", 600000);
+        insertDish(db, "Súp Bong Bóng Cá Tam Tơ", 750000);
+        insertDish(db, "Bacon Cuộn Tôm Nướng Sốt BBQ-Bánh Bao", 900000);
+        insertDish(db, "Bắp Bò Hầm Rượu Vang-Bánh mì", 850000);
+        insertDish(db, "Lẩu Bao Tử Hầm Tiêu Xanh-Bún Tươi", 1200000);
+        insertDish(db, "Chè Nha Đam Ngũ sắc", 300000);
+    }
+
+    private void insertDish(SQLiteDatabase db, String title, double price) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DISH_TITLE, title);
+        values.put(COLUMN_DISH_PRICE, price);
+        db.insert(TABLE_DISHES, null, values);
+    }
+
+    // Lấy tất cả nhà hàng
     public List<Restaurant> getAllRestaurants() {
-        return queryList(this.getReadableDatabase(), TABLE_RESTAURANTS, Restaurant.class, null, null, null);
+        List<Restaurant> restaurantList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_RESTAURANTS, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
+                int image = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
+                restaurantList.add(new Restaurant(id, title, description, image));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return restaurantList;
     }
 
+
+    // Tìm kiếm nhà hàng theo title
     public List<Restaurant> searchRestaurants(String query) {
-        return queryList(this.getReadableDatabase(), TABLE_RESTAURANTS, Restaurant.class,
-                COLUMN_RESTAURANT_TITLE + " LIKE ?", new String[]{"%" + query + "%"}, null);
+        List<Restaurant> restaurantList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selection = COLUMN_RESTAURANT_TITLE + " LIKE ?";
+        String[] selectionArgs = new String[]{"%" + query + "%"};
+        Cursor cursor = db.query(TABLE_RESTAURANTS, null, selection, selectionArgs, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
+                int image = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
+                restaurantList.add(new Restaurant(id,description, title,image));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return restaurantList;
     }
 
+    // Thêm người dùng mới
     public boolean addUser(String name, String phone, String email, String password) {
-        if (checkUserExists(email)) return false;
+        if (checkUserExists(email)) {
+            return false;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_PHONE, phone);
         values.put(COLUMN_EMAIL, email);
         values.put(COLUMN_PASSWORD, password);
-        SQLiteDatabase db = this.getWritableDatabase();
+
         long result = db.insert(TABLE_USERS, null, values);
         db.close();
         return result != -1;
     }
 
+    // Kiểm tra email đã tồn tại
     public boolean checkUserExists(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = null;
-        try {
-            cursor = db.rawQuery("SELECT 1 FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=?", new String[]{email});
-            return cursor.getCount() > 0;
-        } finally {
-            if (cursor != null) cursor.close();
-            db.close();
-        }
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=?", new String[]{email});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return exists;
     }
 
+    // Kiểm tra đăng nhập
     public boolean checkLogin(String email, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
+        boolean exists = false;
         try {
-            cursor = db.rawQuery("SELECT 1 FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=? AND " + COLUMN_PASSWORD + "=?",
-                    new String[]{email, password});
-            return cursor.getCount() > 0;
+            String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=? AND " + COLUMN_PASSWORD + "=?";
+            cursor = db.rawQuery(query, new String[]{email, password});
+            exists = cursor.getCount() > 0;
+        } catch (Exception e) {
+            Log.e("DB_ERROR", "Lỗi truy vấn database: " + e.getMessage());
         } finally {
             if (cursor != null) cursor.close();
             db.close();
         }
+        return exists;
     }
 
+    // Lấy ID người dùng
     public int getUserId(String email, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = null;
-        try {
-            cursor = db.rawQuery("SELECT " + COLUMN_ID + " FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=? AND " + COLUMN_PASSWORD + "=?",
-                    new String[]{email, password});
-            return cursor.moveToFirst() ? cursor.getInt(0) : -1;
-        } finally {
-            if (cursor != null) cursor.close();
-            db.close();
+        Cursor cursor = db.rawQuery("SELECT " + COLUMN_ID + " FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=? AND " + COLUMN_PASSWORD + "=?", new String[]{email, password});
+        int userId = -1;
+        if (cursor.moveToFirst()) {
+            userId = cursor.getInt(0);
         }
+        cursor.close();
+        db.close();
+        return userId;
     }
 
+    // Hiển thị tất cả người dùng (debug)
+    public void showAllUsers() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+                String phone = cursor.getString(2);
+                String email = cursor.getString(3);
+                String password = cursor.getString(4);
+                Log.d("USER_DATA", "ID: " + id + ", Name: " + name + ", Phone: " + phone + ", Email: " + email + ", Password: " + password);
+            } while (cursor.moveToNext());
+        } else {
+            Log.d("USER_DATA", "Không có tài khoản nào trong database.");
+        }
+        cursor.close();
+        db.close();
+    }
+
+    // Phương thức lấy thông tin người dùng dựa trên email
     public User getUserInfo(String email) {
-        return querySingle(this.getReadableDatabase(), TABLE_USERS, User.class,
-                COLUMN_EMAIL + "=?", new String[]{email});
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + "=?", new String[]{email});
+        User user = null;
+        if (cursor.moveToFirst()) {
+            user = new User(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD))
+            );
+        }
+        cursor.close();
+        db.close();
+        return user;
     }
 
     public User getUserInfoByName(String name) {
-        return querySingle(this.getReadableDatabase(), TABLE_USERS, User.class,
-                COLUMN_NAME + "=?", new String[]{name});
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_NAME + "=?", new String[]{name});
+        User user = null;
+        if (cursor.moveToFirst()) {
+            user = new User(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD))
+            );
+        }
+        cursor.close();
+        db.close();
+        return user;
     }
 
-    public long addBooking(int userId, int restaurantId, int tableCount, String bookingDate, String bookingTime, int menuId, double totalPrice) {
+    // Phương thức thêm một booking mới
+    public boolean addBooking(int userId, int restaurantId, int tableCount, String date, String time, int menuId, List<Integer> serviceIds, SQLiteDatabase db) {
+
+        if (tableCount < 5 || tableCount > 50) {
+            return false;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Calendar minDate = Calendar.getInstance();
+        minDate.add(Calendar.DAY_OF_MONTH, 14);
+        try {
+            Date selectedDate = sdf.parse(date);
+            if (selectedDate.before(minDate.getTime())) {
+                return false; //
+            }
+        } catch (ParseException e) {
+            return false;
+        }
+
+        List<String> validTimes = Arrays.asList("15:00", "16:00", "17:00", "18:00", "19:00", "20:00");
+        if (!validTimes.contains(time)) {
+            return false;
+        }
+
+        // Lấy giá menu
+        double menuPrice = 0;
+        Cursor menuCursor = db.rawQuery("SELECT " + COLUMN_MENU_PRICE + " FROM " + TABLE_MENUS + " WHERE " + COLUMN_MENU_ID + " = ?", new String[]{String.valueOf(menuId)});
+        if (menuCursor.moveToFirst()) {
+            menuPrice = menuCursor.getDouble(0);
+        }
+        menuCursor.close();
+
+
+        double serviceTotal = 0;
+        for (int serviceId : serviceIds) {
+            Cursor serviceCursor = db.rawQuery("SELECT price FROM " + TABLE_SERVICES + " WHERE " + COLUMN_SERVICE_ID + " = ?", new String[]{String.valueOf(serviceId)});
+            if (serviceCursor.moveToFirst()) {
+                serviceTotal += serviceCursor.getDouble(0);
+            }
+            serviceCursor.close();
+        }
+
+        // Tính tổng tiền
+        double totalPrice = (menuPrice * tableCount) + serviceTotal;
+
+        // Chèn booking vào database
         ContentValues values = new ContentValues();
         values.put(COLUMN_BOOKING_USER_ID, userId);
         values.put(COLUMN_BOOKING_RESTAURANT_ID, restaurantId);
         values.put(COLUMN_BOOKING_TABLE_COUNT, tableCount);
-        values.put(COLUMN_BOOKING_DATE, bookingDate);
-        values.put(COLUMN_BOOKING_TIME, bookingTime);
+        values.put(COLUMN_BOOKING_DATE, date);
+        values.put(COLUMN_BOOKING_TIME, time);
         values.put(COLUMN_BOOKING_MENU_ID, menuId);
         values.put(COLUMN_BOOKING_TOTAL_PRICE, totalPrice);
-        SQLiteDatabase db = this.getWritableDatabase();
-        long result = db.insert(TABLE_BOOKINGS, null, values);
-        db.close();
-        return result;
+
+        long bookingId = db.insert(TABLE_BOOKINGS, null, values);
+        if (bookingId == -1) {
+            return false;
+        }
+
+        // Chèn dịch vụ vào booking_services
+        for (int serviceId : serviceIds) {
+            ContentValues serviceValues = new ContentValues();
+            serviceValues.put(COLUMN_BS_BOOKING_ID, bookingId);
+            serviceValues.put(COLUMN_BS_SERVICE_ID, serviceId);
+            db.insert(TABLE_BOOKING_SERVICES, null, serviceValues);
+        }
+
+        return true;
     }
 
+
+    // Phương thức thêm dịch vụ vào booking
     public boolean addBookingService(long bookingId, int serviceId) {
+        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_BS_BOOKING_ID, bookingId);
         values.put(COLUMN_BS_SERVICE_ID, serviceId);
-        SQLiteDatabase db = this.getWritableDatabase();
+
         long result = db.insert(TABLE_BOOKING_SERVICES, null, values);
         db.close();
         return result != -1;
     }
 
+    // Lấy tất cả menu
     public List<Menu> getAllMenus() {
-        return queryList(this.getReadableDatabase(), TABLE_MENUS, Menu.class, null, null, null);
+        List<Menu> menuList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_MENUS, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_TITLE));
+                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_MENU_PRICE));
+                menuList.add(new Menu(id, title, price));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return menuList;
     }
 
+    // Lấy tất cả dịch vụ
     public List<Service> getAllServices() {
-        return queryList(this.getReadableDatabase(), TABLE_SERVICES, Service.class, null, null, null);
+        List<Service> serviceList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SERVICES, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_TITLE));
+                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_PRICE));
+                serviceList.add(new Service(id, title, price));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return serviceList;
     }
 
+    // Lấy tất cả món ăn
     public List<Dish> getAllDishes() {
-        return queryList(this.getReadableDatabase(), TABLE_DISHES, Dish.class, null, null, null);
-    }
-
-    public Booking getBookingById(long bookingId) {
+        List<Dish> dishList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT b.*, r." + COLUMN_RESTAURANT_TITLE + " AS restaurant_name " +
-                "FROM " + TABLE_BOOKINGS + " b " +
-                "JOIN " + TABLE_RESTAURANTS + " r ON b." + COLUMN_BOOKING_RESTAURANT_ID + " = r." + COLUMN_RESTAURANT_ID +
-                " WHERE b." + COLUMN_BOOKING_ID + "=?";
-        Cursor cursor = null;
-        try {
-            cursor = db.rawQuery(query, new String[]{String.valueOf(bookingId)});
-            return cursor.moveToFirst() ? new Booking(cursor) : null;
-        } finally {
-            if (cursor != null) cursor.close();
-            db.close();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_DISHES, null);
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DISH_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DISH_TITLE));
+                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_DISH_PRICE));
+                dishList.add(new Dish(id, title, price));
+            } while (cursor.moveToNext());
         }
-    }
-
-    public boolean updateBooking(long bookingId, int tableCount, String bookingDate, String bookingTime, int menuId, double totalPrice) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_BOOKING_TABLE_COUNT, tableCount);
-        values.put(COLUMN_BOOKING_DATE, bookingDate);
-        values.put(COLUMN_BOOKING_TIME, bookingTime);
-        values.put(COLUMN_BOOKING_MENU_ID, menuId);
-        values.put(COLUMN_BOOKING_TOTAL_PRICE, totalPrice);
-        SQLiteDatabase db = this.getWritableDatabase();
-        int rows = db.update(TABLE_BOOKINGS, values, COLUMN_BOOKING_ID + "=?", new String[]{String.valueOf(bookingId)});
+        cursor.close();
         db.close();
-        return rows > 0;
+        return dishList;
     }
 
-    public void deleteBookingServices(long bookingId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_BOOKING_SERVICES, COLUMN_BS_BOOKING_ID + "=?", new String[]{String.valueOf(bookingId)});
-        db.close();
-    }
-
-    public List<Booking> getUserBookings(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT b.*, r." + COLUMN_RESTAURANT_TITLE + " AS restaurant_name " +
-                "FROM " + TABLE_BOOKINGS + " b " +
-                "JOIN " + TABLE_RESTAURANTS + " r ON b." + COLUMN_BOOKING_RESTAURANT_ID + " = r." + COLUMN_RESTAURANT_ID +
-                " JOIN " + TABLE_USERS + " u ON b." + COLUMN_BOOKING_USER_ID + " = u." + COLUMN_ID +
-                " WHERE u." + COLUMN_EMAIL + "=?";
-        Cursor cursor = null;
-        List<Booking> bookings = new ArrayList<>();
-        try {
-            cursor = db.rawQuery(query, new String[]{email});
-            while (cursor.moveToNext()) {
-                bookings.add(new Booking(cursor));
-            }
-        } finally {
-            if (cursor != null) cursor.close();
-            db.close();
-        }
-        return bookings;
-    }
-
+    // Thêm một thanh toán mới
     public long addThanhToan(String hoTen, String email, String soDienThoai, int soLuongBan,
-                             String ngayDatTiec, String ghiChu, double tongTien, String phuongThucThanhToan,
-                             double soTienDaThanhToan, String trangThaiThanhToan, long bookingId) {
+                             String ngayDatTiec, String ghiChu, double tongTien,
+                             String phuongThucThanhToan, double soTienDaThanhToan, String trangThaiThanhToan) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_TT_BOOKING_ID, bookingId);
         values.put(COLUMN_TT_HOTEN, hoTen);
         values.put(COLUMN_TT_EMAIL, email);
         values.put(COLUMN_TT_SODIENTHOAI, soDienThoai);
@@ -423,83 +565,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_TT_PHUONGTHUC, phuongThucThanhToan);
         values.put(COLUMN_TT_SOTIENDATHANHTOAN, soTienDaThanhToan);
         values.put(COLUMN_TT_TRANGTHAI, trangThaiThanhToan);
+
         long id = db.insert(TABLE_THANHTOAN, null, values);
         db.close();
         return id;
     }
 
-    public ThanhToan getThanhToanByBookingId(long bookingId) {
-        return querySingle(this.getReadableDatabase(), TABLE_THANHTOAN, ThanhToan.class,
-                COLUMN_TT_BOOKING_ID + "=?", new String[]{String.valueOf(bookingId)});
-    }
-
-    public boolean updateThanhToan(int maThanhToan, String hoTen, String email, String soDienThoai, int soLuongBan,
-                                   String ngayDatTiec, String ghiChu, double tongTien, String phuongThucThanhToan,
-                                   double soTienDaThanhToan, String trangThaiThanhToan) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_TT_HOTEN, hoTen);
-        values.put(COLUMN_TT_EMAIL, email);
-        values.put(COLUMN_TT_SODIENTHOAI, soDienThoai);
-        values.put(COLUMN_TT_SOLUONGBAN, soLuongBan);
-        values.put(COLUMN_TT_NGAYDATTIEC, ngayDatTiec);
-        values.put(COLUMN_TT_GHICHU, ghiChu);
-        values.put(COLUMN_TT_TONGTIEN, tongTien);
-        values.put(COLUMN_TT_PHUONGTHUC, phuongThucThanhToan);
-        values.put(COLUMN_TT_SOTIENDATHANHTOAN, soTienDaThanhToan);
-        values.put(COLUMN_TT_TRANGTHAI, trangThaiThanhToan);
-        SQLiteDatabase db = this.getWritableDatabase();
-        int rows = db.update(TABLE_THANHTOAN, values, COLUMN_TT_ID + "=?", new String[]{String.valueOf(maThanhToan)});
-        db.close();
-        return rows > 0;
-    }
-
-    private <T> List<T> queryList(SQLiteDatabase db, String table, Class<T> clazz, String selection, String[] selectionArgs, String orderBy) {
-        List<T> result = new ArrayList<>();
-        Cursor cursor = null;
-        try {
-            cursor = db.query(table, null, selection, selectionArgs, null, null, orderBy);
-            while (cursor.moveToNext()) {
-                if (clazz == Restaurant.class) result.add((T) new Restaurant(cursor));
-                else if (clazz == Menu.class) result.add((T) new Menu(cursor));
-                else if (clazz == Service.class) result.add((T) new Service(cursor));
-                else if (clazz == Dish.class) result.add((T) new Dish(cursor));
-                else if (clazz == Booking.class) result.add((T) new Booking(cursor));
-            }
-        } finally {
-            if (cursor != null) cursor.close();
-            db.close();
-        }
-        return result;
-    }
-
-    private <T> T querySingle(SQLiteDatabase db, String table, Class<T> clazz, String selection, String[] selectionArgs) {
-        Cursor cursor = null;
-        try {
-            cursor = db.query(table, null, selection, selectionArgs, null, null, null);
-            if (cursor.moveToFirst()) {
-                if (clazz == User.class) return (T) new User(cursor);
-                else if (clazz == ThanhToan.class) return (T) new ThanhToan(cursor);
-            }
-            return null;
-        } finally {
-            if (cursor != null) cursor.close();
-            db.close();
-        }
-    }
-
-    // --- Các lớp mô hình ---
-
+    // Lớp User
     public static class User {
         private int id;
-        private String name, phone, email, password;
-
-        public User(Cursor cursor) {
-            id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-            name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
-            phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE));
-            email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL));
-            password = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD));
-        }
+        private String name;
+        private String phone;
+        private String email;
+        private String password;
 
         public User(int id, String name, String phone, String email, String password) {
             this.id = id;
@@ -516,37 +594,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public String getPassword() { return password; }
     }
 
-    public static class Restaurant {
+    // Lớp Restaurant
+    public class Restaurant {
+        private int id;
+        private String title;
+        private String description;
         private int image;
-        private String title, description;
 
-        public Restaurant(Cursor cursor) {
-            image = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
-            title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE));
-            description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-        }
-
-        public Restaurant(int image, String title, String description) {
-            this.image = image;
+        public Restaurant(int id, String title, String description, int image) {
+            this.id = id;
             this.title = title;
             this.description = description;
+            this.image = image;
         }
 
-        public int getImage() { return image; }
+        // Getter methods
+        public int getId() { return id; }
         public String getTitle() { return title; }
         public String getDescription() { return description; }
+        public int getImage() { return image; }
     }
 
+    // Lớp Menu
     public static class Menu {
         private int id;
         private String title;
         private double price;
-
-        public Menu(Cursor cursor) {
-            id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_ID));
-            title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_TITLE));
-            price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_MENU_PRICE));
-        }
 
         public Menu(int id, String title, double price) {
             this.id = id;
@@ -559,16 +632,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public double getPrice() { return price; }
     }
 
+    // Lớp Service
     public static class Service {
         private int id;
         private String title;
         private double price;
-
-        public Service(Cursor cursor) {
-            id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_ID));
-            title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_TITLE));
-            price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_PRICE));
-        }
 
         public Service(int id, String title, double price) {
             this.id = id;
@@ -581,16 +649,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public double getPrice() { return price; }
     }
 
+    // Lớp Dish
     public static class Dish {
         private int id;
         private String title;
         private double price;
-
-        public Dish(Cursor cursor) {
-            id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DISH_ID));
-            title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DISH_TITLE));
-            price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_DISH_PRICE));
-        }
 
         public Dish(int id, String title, double price) {
             this.id = id;
@@ -603,72 +666,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public double getPrice() { return price; }
     }
 
-    public static class Booking {
-        private int id, userId, restaurantId, tableCount, menuId;
-        private String bookingDate, bookingTime, restaurantName;
-        private double totalPrice;
-
-        public Booking(Cursor cursor) {
-            id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
-            userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_USER_ID));
-            restaurantId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_RESTAURANT_ID));
-            tableCount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_COUNT));
-            bookingDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE));
-            bookingTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME));
-            menuId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_MENU_ID));
-            totalPrice = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TOTAL_PRICE));
-            restaurantName = cursor.getString(cursor.getColumnIndexOrThrow("restaurant_name"));
-        }
-
-        public Booking(int id, int userId, int restaurantId, int tableCount, String bookingDate, String bookingTime, int menuId, double totalPrice, String restaurantName) {
-            this.id = id;
-            this.userId = userId;
-            this.restaurantId = restaurantId;
-            this.tableCount = tableCount;
-            this.bookingDate = bookingDate;
-            this.bookingTime = bookingTime;
-            this.menuId = menuId;
-            this.totalPrice = totalPrice;
-            this.restaurantName = restaurantName;
-        }
-
-        public int getId() { return id; }
-        public int getUserId() { return userId; }
-        public int getRestaurantId() { return restaurantId; }
-        public int getTableCount() { return tableCount; }
-        public String getBookingDate() { return bookingDate; }
-        public String getBookingTime() { return bookingTime; }
-        public int getMenuId() { return menuId; }
-        public double getTotalPrice() { return totalPrice; }
-        public String getRestaurantName() { return restaurantName; }
-    }
-
+    // Lớp ThanhToan
     public static class ThanhToan {
-        private int maThanhToan, soLuongBan;
-        private long bookingId;
-        private String hoTen, email, soDienThoai, ngayDatTiec, ghiChu, phuongThucThanhToan, trangThaiThanhToan;
-        private double tongTien, soTienDaThanhToan;
+        private int maThanhToan;
+        private String hoTen;
+        private String email;
+        private String soDienThoai;
+        private int soLuongBan;
+        private String ngayDatTiec;
+        private String ghiChu;
+        private double tongTien;
+        private String phuongThucThanhToan;
+        private double soTienDaThanhToan;
+        private String trangThaiThanhToan;
 
-        public ThanhToan(Cursor cursor) {
-            maThanhToan = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_ID));
-            bookingId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_TT_BOOKING_ID));
-            hoTen = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_HOTEN));
-            email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_EMAIL));
-            soDienThoai = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_SODIENTHOAI));
-            soLuongBan = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_SOLUONGBAN));
-            ngayDatTiec = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_NGAYDATTIEC));
-            ghiChu = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_GHICHU));
-            tongTien = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TT_TONGTIEN));
-            phuongThucThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_PHUONGTHUC));
-            soTienDaThanhToan = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TT_SOTIENDATHANHTOAN));
-            trangThaiThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_TRANGTHAI));
-        }
-
-        public ThanhToan(int maThanhToan, long bookingId, String hoTen, String email, String soDienThoai, int soLuongBan,
-                         String ngayDatTiec, String ghiChu, double tongTien, String phuongThucThanhToan,
-                         double soTienDaThanhToan, String trangThaiThanhToan) {
+        public ThanhToan(int maThanhToan, String hoTen, String email, String soDienThoai,
+                         int soLuongBan, String ngayDatTiec, String ghiChu, double tongTien,
+                         String phuongThucThanhToan, double soTienDaThanhToan, String trangThaiThanhToan) {
             this.maThanhToan = maThanhToan;
-            this.bookingId = bookingId;
             this.hoTen = hoTen;
             this.email = email;
             this.soDienThoai = soDienThoai;
@@ -682,7 +697,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         public int getMaThanhToan() { return maThanhToan; }
-        public long getBookingId() { return bookingId; }
         public String getHoTen() { return hoTen; }
         public String getEmail() { return email; }
         public String getSoDienThoai() { return soDienThoai; }
