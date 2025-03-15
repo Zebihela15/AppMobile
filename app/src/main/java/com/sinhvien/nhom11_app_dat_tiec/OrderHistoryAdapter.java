@@ -1,4 +1,4 @@
-package com.sinhvien.nhom11_app_dat_tiec;
+/*package com.sinhvien.nhom11_app_dat_tiec;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,3 +50,5 @@ public class OrderHistoryAdapter extends RecyclerView.Adapter<OrderHistoryAdapte
         }
     }
 }
+
+ */

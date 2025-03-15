@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:orientation="vertical">
+    android:background="@android:color/white">
 
     <!-- Header -->
     <LinearLayout
@@ -27,7 +26,7 @@
             android:textColor="@android:color/white"/>
     </LinearLayout>
 
-    <!-- ScrollView để chứa nội dung chính -->
+    <!-- ScrollView chứa nội dung chỉnh sửa -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -42,41 +41,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-
-            <!-- Thông tin nhà hàng -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/ivRestaurant"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/dtc1" />
-
-                    <TextView
-                        android:id="@+id/tvRestaurantName"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="16dp"
-                        android:text="Tên nhà hàng"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
 
             <!-- Số bàn -->
             <androidx.cardview.widget.CardView
@@ -238,112 +202,6 @@
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <!-- Menu -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Chọn menu:"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"/>
-
-                    <RadioGroup
-                        android:id="@+id/rgMenu"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="8dp">
-
-                        <RadioButton
-                            android:id="@+id/rbMenu1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Menu 1 - 3,550,000 VNĐ/bàn"
-                            android:textSize="14sp"/>
-
-                        <RadioButton
-                            android:id="@+id/rbMenu2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Menu 2 - 5,000,000 VNĐ/bàn"
-                            android:textSize="14sp"
-                            android:layout_marginTop="8dp"/>
-                    </RadioGroup>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Dịch vụ bổ sung -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Dịch vụ bổ sung:"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"/>
-
-                    <CheckBox
-                        android:id="@+id/cbService1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Dịch vụ 1 - 100,000 VNĐ"
-                        android:textSize="14sp"
-                        android:layout_marginTop="8dp"/>
-
-                    <CheckBox
-                        android:id="@+id/cbService2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Dịch vụ 2 - 150,000 VNĐ"
-                        android:textSize="14sp"
-                        android:layout_marginTop="8dp"/>
-
-                    <CheckBox
-                        android:id="@+id/cbService3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Dịch vụ 3 - 200,000 VNĐ"
-                        android:textSize="14sp"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Tổng giá -->
-            <TextView
-                android:id="@+id/tvTotalPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Tổng cộng: 0 VNĐ"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:gravity="end"/>
         </LinearLayout>
     </ScrollView>
 
@@ -362,5 +220,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

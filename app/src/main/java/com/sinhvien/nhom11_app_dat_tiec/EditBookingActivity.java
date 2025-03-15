@@ -1,43 +1,35 @@
 package com.sinhvien.nhom11_app_dat_tiec;
 
 import android.app.DatePickerDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Patterns;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class EditBookingActivity extends AppCompatActivity {
-
-    private EditText etTableCount, etFullName, etPhone, etEmail;
-    private Button btnSelectDate, btnSaveChanges;
-    private Spinner spinnerTime;
-    private RadioGroup rgMenu;
-    private CheckBox cbService1, cbService2, cbService3;
-    private TextView tvTotalPrice, tvRestaurantName;
-    private ImageView ivRestaurant;
     private DatabaseHelper dbHelper;
-    private int tableCount;
-    private String selectedDate;
-    private static final int MAX_TABLES = 20;
-    private long bookingId;
-    private DatabaseHelper.ThanhToan thanhToan;
+    private EditText etTableCount, etFullName, etPhone, etEmail;
+    private Button btnDecrease, btnIncrease, btnSelectDate, btnSaveChanges;
+    private Spinner spinnerTime;
+    private int bookingId; // Thay từ long thành int
+    private int paymentId;
+    private String originalDate;
+    private int originalMenuId;
+    private List<Integer> originalServiceIds = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,253 +37,166 @@ public class EditBookingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_booking);
 
         dbHelper = new DatabaseHelper(this);
-        initializeViews();
-        loadBookingData();
-        setupClickListeners();
-        setupTimeSpinner();
-        updateTotalPrice();
-    }
-
-    private void initializeViews() {
         etTableCount = findViewById(R.id.etTableCount);
-        btnSelectDate = findViewById(R.id.btnSelectDate);
-        spinnerTime = findViewById(R.id.spinnerTime);
-        btnSaveChanges = findViewById(R.id.btnSaveChanges);
         etFullName = findViewById(R.id.etFullName);
         etPhone = findViewById(R.id.etPhone);
         etEmail = findViewById(R.id.etEmail);
-        rgMenu = findViewById(R.id.rgMenu);
-        cbService1 = findViewById(R.id.cbService1);
-        cbService2 = findViewById(R.id.cbService2);
-        cbService3 = findViewById(R.id.cbService3);
-        tvTotalPrice = findViewById(R.id.tvTotalPrice);
-        ivRestaurant = findViewById(R.id.ivRestaurant);
-        tvRestaurantName = findViewById(R.id.tvRestaurantName);
+        btnDecrease = findViewById(R.id.btnDecrease);
+        btnIncrease = findViewById(R.id.btnIncrease);
+        btnSelectDate = findViewById(R.id.btnSelectDate);
+        btnSaveChanges = findViewById(R.id.btnSaveChanges);
+        spinnerTime = findViewById(R.id.spinnerTime);
 
-        View.OnClickListener priceListener = v -> updateTotalPrice();
-        cbService1.setOnClickListener(priceListener);
-        cbService2.setOnClickListener(priceListener);
-        cbService3.setOnClickListener(priceListener);
-        rgMenu.setOnCheckedChangeListener((group, checkedId) -> updateTotalPrice());
+        bookingId = getIntent().getIntExtra("booking_id", -1); // Sửa từ getLongExtra thành getIntExtra
+        paymentId = getIntent().getIntExtra("payment_id", -1);
+        originalDate = getIntent().getStringExtra("original_date");
+        Log.d("EditBooking", "Booking ID: " + bookingId + ", Payment ID: " + paymentId);
+
+        List<String> timeOptions = Arrays.asList("15:00", "16:00", "17:00", "18:00", "19:00", "20:00");
+        ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, timeOptions);
+        timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerTime.setAdapter(timeAdapter);
+
+        loadBookingDetails();
+
+        btnDecrease.setOnClickListener(v -> {
+            int count = Integer.parseInt(etTableCount.getText().toString());
+            if (count > 5) {
+                count--;
+                etTableCount.setText(String.valueOf(count));
+                Log.d("EditBooking", "Decreased to: " + count);
+            }
+        });
+
+        btnIncrease.setOnClickListener(v -> {
+            int count = Integer.parseInt(etTableCount.getText().toString());
+            if (count < 50) {
+                count++;
+                etTableCount.setText(String.valueOf(count));
+                Log.d("EditBooking", "Increased to: " + count);
+            }
+        });
+
+        btnSelectDate.setOnClickListener(v -> showDatePicker());
+        btnSaveChanges.setOnClickListener(v -> saveChanges());
     }
 
-    private void loadBookingData() {
-        Intent intent = getIntent();
-        bookingId = intent.getLongExtra("booking_id", -1);
-        Log.d("EditBookingActivity", "Booking ID received: " + bookingId);
-        if (bookingId == -1) {
-            showToast("Không tìm thấy đơn đặt tiệc - bookingId không hợp lệ");
+    private void loadBookingDetails() {
+        String userIdStr = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("user_id", "-1");
+        int userId;
+        try {
+            userId = Integer.parseInt(userIdStr);
+        } catch (NumberFormatException e) {
+            userId = -1;
+        }
+
+        if (userId == -1) {
+            Toast.makeText(this, "Không tìm thấy user ID", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        DatabaseHelper.Booking booking = dbHelper.getBookingById(bookingId);
-        Log.d("EditBookingActivity", "Booking: " + (booking != null ? "Found - Date: " + booking.getBookingDate() : "null"));
-        if (booking == null) {
-            showToast("Không tìm thấy đơn đặt tiệc với bookingId: " + bookingId);
+        List<DatabaseHelper.Booking> bookings = dbHelper.getUserBookings(userId);
+        DatabaseHelper.Booking currentBooking = null;
+        for (DatabaseHelper.Booking booking : bookings) {
+            if (booking.getId() == bookingId) {
+                currentBooking = booking;
+                break;
+            }
+        }
+
+        if (currentBooking != null) {
+            etTableCount.setText(String.valueOf(currentBooking.getTableCount()));
+            btnSelectDate.setText(currentBooking.getDate());
+            spinnerTime.setSelection(((ArrayAdapter<String>) spinnerTime.getAdapter()).getPosition(currentBooking.getTime()));
+            originalMenuId = currentBooking.getMenuId();
+            originalServiceIds = dbHelper.getServiceIdsForBooking(bookingId);
+            Log.d("EditBooking", "Loaded Table Count: " + currentBooking.getTableCount());
+        } else {
+            Toast.makeText(this, "Không tìm thấy booking với ID: " + bookingId, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        thanhToan = dbHelper.getThanhToanByBookingId(bookingId);
-        Log.d("EditBookingActivity", "ThanhToan: " + (thanhToan != null ? "Found - Name: " + thanhToan.getHoTen() : "null"));
-
-        // Điền dữ liệu từ booking
-        tableCount = booking.getTableCount();
-        selectedDate = booking.getBookingDate();
-        etTableCount.setText(String.valueOf(tableCount));
-        btnSelectDate.setText(selectedDate);
-        spinnerTime.setSelection(getTimePosition(booking.getBookingTime()));
-        tvRestaurantName.setText(booking.getRestaurantName());
-        ivRestaurant.setImageResource(intent.getIntExtra("restaurant_image", R.drawable.dtc1));
-
-        if (booking.getMenuId() == 1) rgMenu.check(R.id.rbMenu1);
-        else if (booking.getMenuId() == 2) rgMenu.check(R.id.rbMenu2);
-
-        ArrayList<String> services = intent.getStringArrayListExtra("services");
-        if (services != null) {
-            cbService1.setChecked(services.contains("Dịch vụ 1"));
-            cbService2.setChecked(services.contains("Dịch vụ 2"));
-            cbService3.setChecked(services.contains("Dịch vụ 3"));
-        }
-
+        DatabaseHelper.ThanhToan thanhToan = dbHelper.getThanhToan(paymentId);
         if (thanhToan != null) {
             etFullName.setText(thanhToan.getHoTen());
             etPhone.setText(thanhToan.getSoDienThoai());
             etEmail.setText(thanhToan.getEmail());
-        } else {
-            etFullName.setText("");
-            etPhone.setText("");
-            etEmail.setText("");
-            Log.d("EditBookingActivity", "No payment record found, allowing edit without payment info");
         }
     }
 
-    private int getTimePosition(String time) {
-        String[] times = {"7:00", "7:30", "8:00", "8:30", "9:00", "9:30", "10:00"};
-        for (int i = 0; i < times.length; i++) {
-            if (times[i].equals(time)) return i;
-        }
-        return 0;
-    }
-
-    private void setupClickListeners() {
-        findViewById(R.id.btnIncrease).setOnClickListener(v -> {
-            if (tableCount < MAX_TABLES) {
-                tableCount++;
-                etTableCount.setText(String.valueOf(tableCount));
-                updateTotalPrice();
-            } else {
-                showToast("Số bàn tối đa là " + MAX_TABLES);
-            }
-        });
-
-        findViewById(R.id.btnDecrease).setOnClickListener(v -> {
-            if (tableCount > 5) {
-                tableCount--;
-                etTableCount.setText(String.valueOf(tableCount));
-                updateTotalPrice();
-            } else {
-                showToast("Số bàn tối thiểu là 5");
-            }
-        });
-
-        btnSelectDate.setOnClickListener(v -> showDatePickerDialog());
-        btnSaveChanges.setOnClickListener(v -> handleSaveChanges());
-    }
-
-    private void setupTimeSpinner() {
-        String[] times = {"7:00", "7:30", "8:00", "8:30", "9:00", "9:30", "10:00"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, times);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerTime.setAdapter(adapter);
-    }
-
-    private double calculateTotalPrice() { // Đổi sang double để đồng bộ với PaymentActivity
-        double total = 0;
-        int selectedMenuId = rgMenu.getCheckedRadioButtonId();
-        if (selectedMenuId == R.id.rbMenu1) total += tableCount * 3550000.0;
-        else if (selectedMenuId == R.id.rbMenu2) total += tableCount * 5000000.0;
-        if (cbService1.isChecked()) total += 100000.0;
-        if (cbService2.isChecked()) total += 150000.0;
-        if (cbService3.isChecked()) total += 200000.0;
-        return total;
-    }
-
-    private void updateTotalPrice() {
-        double total = calculateTotalPrice();
-        tvTotalPrice.setText(String.format("Tổng cộng: %,d VNĐ", (long) total)); // Ép về long để hiển thị không có thập phân
-    }
-
-    private void handleSaveChanges() {
-        String fullName = etFullName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
-        String time = spinnerTime.getSelectedItem().toString();
-        int menuId = getSelectedMenuId();
-        double totalPrice = calculateTotalPrice();
-
-        if (!validateInput(fullName, phone, email)) return;
-
-        // Cập nhật bảng bookings
-        boolean bookingUpdated = dbHelper.updateBooking(
-                bookingId, tableCount, selectedDate, time, menuId, totalPrice
-        );
-
-        // Xóa và cập nhật lại dịch vụ
-        dbHelper.deleteBookingServices(bookingId);
-        boolean servicesAdded = true;
-        if (cbService1.isChecked()) servicesAdded &= dbHelper.addBookingService(bookingId, 1);
-        if (cbService2.isChecked()) servicesAdded &= dbHelper.addBookingService(bookingId, 2);
-        if (cbService3.isChecked()) servicesAdded &= dbHelper.addBookingService(bookingId, 3);
-
-        // Cập nhật hoặc thêm mới bảng thanhtoan
-        boolean thanhToanUpdated;
-        if (thanhToan != null) {
-            thanhToanUpdated = dbHelper.updateThanhToan(
-                    thanhToan.getMaThanhToan(), fullName, email, phone, tableCount, selectedDate,
-                    thanhToan.getGhiChu(), totalPrice, thanhToan.getPhuongThucThanhToan(),
-                    thanhToan.getSoTienDaThanhToan(), thanhToan.getTrangThaiThanhToan()
-            );
-        } else {
-            long result = dbHelper.addThanhToan(
-                    fullName, email, phone, tableCount, selectedDate, "", totalPrice,
-                    "Chưa thanh toán", 0, "Chưa thanh toán", bookingId
-            );
-            thanhToanUpdated = result != -1;
-        }
-
-        if (bookingUpdated && thanhToanUpdated && servicesAdded) {
-            showToast("Cập nhật đơn đặt tiệc thành công!", Toast.LENGTH_LONG);
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra("updated_total_price", totalPrice);
-            startActivity(intent);
-            finish();
-        } else {
-            showToast("Cập nhật thất bại, vui lòng thử lại");
-            Log.d("EditBookingActivity", "Booking updated: " + bookingUpdated +
-                    ", ThanhToan updated: " + thanhToanUpdated +
-                    ", Services added: " + servicesAdded);
-        }
-    }
-
-    private int getSelectedMenuId() {
-        int selectedId = rgMenu.getCheckedRadioButtonId();
-        if (selectedId == R.id.rbMenu1) return 1;
-        if (selectedId == R.id.rbMenu2) return 2;
-        return -1;
-    }
-
-    private boolean validateInput(String fullName, String phone, String email) {
-        if (selectedDate.isEmpty()) {
-            showToast("Vui lòng chọn ngày");
-            return false;
-        }
-        if (fullName.isEmpty() || phone.isEmpty() || email.isEmpty()) {
-            showToast("Vui lòng điền đầy đủ thông tin");
-            return false;
-        }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showToast("Email không hợp lệ");
-            return false;
-        }
-        if (!Patterns.PHONE.matcher(phone).matches() || phone.length() < 10) {
-            showToast("Số điện thoại không hợp lệ");
-            return false;
-        }
-        RadioButton rbMenu1 = findViewById(R.id.rbMenu1);
-        RadioButton rbMenu2 = findViewById(R.id.rbMenu2);
-        if (!rbMenu1.isChecked() && !rbMenu2.isChecked()) {
-            showToast("Vui lòng chọn 1 trong 2 menu");
-            return false;
-        }
-        return true;
-    }
-
-    private void showDatePickerDialog() {
+    private void showDatePicker() {
         Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
-                (view, selectedYear, selectedMonth, selectedDay) -> {
-                    selectedDate = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                (view, year, month, dayOfMonth) -> {
+                    String selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
                     btnSelectDate.setText(selectedDate);
-                }, year, month, day);
-
-        calendar.add(Calendar.DAY_OF_MONTH, 7);
-        datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis());
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
         datePickerDialog.show();
     }
 
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
+    private void saveChanges() {
+        int tableCount = Integer.parseInt(etTableCount.getText().toString());
+        String newDate = btnSelectDate.getText().toString();
+        String newTime = spinnerTime.getSelectedItem().toString();
+        String fullName = etFullName.getText().toString();
+        String phone = etPhone.getText().toString();
+        String email = etEmail.getText().toString();
 
-    private void showToast(String message, int duration) {
-        Toast.makeText(this, message, duration).show();
+        Log.d("EditBooking", "Saving - Table Count: " + tableCount);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            Date original = sdf.parse(originalDate);
+            Date newSelected = sdf.parse(newDate);
+            Calendar minChangeDate = Calendar.getInstance();
+            minChangeDate.setTime(original);
+            minChangeDate.add(Calendar.DAY_OF_MONTH, -5);
+
+            if (newSelected.before(minChangeDate.getTime())) {
+                Toast.makeText(this, "Chỉ có thể thay đổi ngày trước 5 ngày so với ngày gốc!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (ParseException e) {
+            Toast.makeText(this, "Lỗi định dạng ngày!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean bookingUpdated = dbHelper.updateBooking(bookingId, tableCount, newDate, newTime, originalMenuId, originalServiceIds);
+        if (bookingUpdated) {
+            double menuPrice = originalMenuId == 1 ? 3550000 : 5000000;
+            double serviceCost = 0;
+            for (int serviceId : originalServiceIds) {
+                switch (serviceId) {
+                    case 1:
+                        serviceCost += 100000;
+                        break;
+                    case 2:
+                        serviceCost += 150000;
+                        break;
+                    case 3:
+                        serviceCost += 200000;
+                        break;
+                }
+            }
+            double newTotalPrice = (tableCount * menuPrice) + serviceCost;
+
+            DatabaseHelper.ThanhToan thanhToan = dbHelper.getThanhToan(paymentId);
+            String paymentMethod = thanhToan != null ? thanhToan.getPhuongThucThanhToan() : "Đặt cọc 50%";
+            double amountPaid = thanhToan != null ? thanhToan.getSoTienDaThanhToan() : newTotalPrice * 0.5;
+
+            boolean paymentUpdated = dbHelper.updateThanhToan(paymentId, fullName, email, phone, tableCount, newDate, "",
+                    newTotalPrice, paymentMethod, amountPaid, "Đã thanh toán");
+            if (paymentUpdated) {
+                Toast.makeText(this, "Cập nhật đơn hàng thành công!", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
+            } else {
+                Toast.makeText(this, "Lỗi khi cập nhật thanh toán!", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Lỗi khi cập nhật booking!", Toast.LENGTH_SHORT).show();
+        }
     }
 }

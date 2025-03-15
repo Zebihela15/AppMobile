@@ -1,8 +1,8 @@
 package com.sinhvien.nhom11_app_dat_tiec;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
@@ -12,18 +12,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class PaymentActivity extends AppCompatActivity {
-
-    private TextView tvFullName, tvEmail, tvPhone, tvTableCount, tvDate, tvTotalPrice, tvTime, tvMenu, tvServices, tvSubTotalPrice;
+    private TextView tvFullName, tvPhone, tvEmail, tvDate, tvTime, tvTableCount, tvTotalPrice;
     private RadioGroup rgPaymentMethod;
+    private RadioButton rbFullPayment, rbDeposit;
     private Button btnConfirmPayment;
     private DatabaseHelper dbHelper;
     private double totalPrice;
-    private long bookingId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,109 +29,111 @@ public class PaymentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_payment);
 
         dbHelper = new DatabaseHelper(this);
-        initializeViews();
-        getBookingDetails();
-        setupPayment();
+        initViews();
+        setupPaymentDetails();
+        setupListeners();
     }
 
-    private void initializeViews() {
+    private void initViews() {
         tvFullName = findViewById(R.id.tvFullName);
-        tvEmail = findViewById(R.id.tvEmail);
         tvPhone = findViewById(R.id.tvPhone);
-        tvTableCount = findViewById(R.id.tvTableCount);
+        tvEmail = findViewById(R.id.tvEmail);
         tvDate = findViewById(R.id.tvDate);
+        tvTime = findViewById(R.id.tvTime);
+        tvTableCount = findViewById(R.id.tvTableCount);
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
         rgPaymentMethod = findViewById(R.id.rgPaymentMethod);
+        rbFullPayment = findViewById(R.id.rbFullPayment);
+        rbDeposit = findViewById(R.id.rbDeposit);
         btnConfirmPayment = findViewById(R.id.btnConfirmPayment);
-        tvTime = findViewById(R.id.tvTime);
-        tvMenu = findViewById(R.id.tvMenu);
-        tvServices = findViewById(R.id.tvServices);
-        tvSubTotalPrice = findViewById(R.id.tvSubTotalPrice);
     }
 
-    private void getBookingDetails() {
+    private void setupPaymentDetails() {
         Intent intent = getIntent();
-        if (intent == null || intent.getExtras() == null) {
-            Toast.makeText(this, "Lỗi: Không nhận được dữ liệu đặt tiệc!", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
+        tvFullName.setText(intent.getStringExtra("full_name"));
+        tvPhone.setText(intent.getStringExtra("phone"));
+        tvEmail.setText(intent.getStringExtra("email"));
+        tvDate.setText(intent.getStringExtra("date"));
+        tvTime.setText(intent.getStringExtra("time"));
+        tvTableCount.setText(String.valueOf(intent.getIntExtra("table_count", 0)));
 
-        bookingId = intent.getLongExtra("booking_id", -1);
-        if (bookingId == -1) {
-            Log.e("PaymentActivity", "Lỗi: Không nhận được booking_id!");
-            Toast.makeText(this, "Lỗi dữ liệu đặt tiệc!", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        String fullName = intent.getStringExtra("full_name");
-        String phone = intent.getStringExtra("phone");
-        String email = intent.getStringExtra("email");
-        String date = intent.getStringExtra("date");
-        String time = intent.getStringExtra("time");
-        String menu = intent.getStringExtra("menu");
         int tableCount = intent.getIntExtra("table_count", 0);
-        totalPrice = (double) intent.getLongExtra("total_price", 0L); // Sửa lỗi ClassCastException
-        ArrayList<String> services = intent.getStringArrayListExtra("services");
+        int menuId = intent.getIntExtra("menu_id", 1);
+        ArrayList<Integer> serviceIds = intent.getIntegerArrayListExtra("service_ids");
 
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-
-        tvFullName.setText(fullName != null ? "Họ tên: " + fullName : "Họ tên: Chưa có");
-        tvPhone.setText(phone != null ? "Số điện thoại: " + phone : "Số điện thoại: Chưa có");
-        tvEmail.setText(email != null ? "Email: " + email : "Email: Chưa có");
-        tvDate.setText(date != null ? "Ngày: " + date : "Ngày: Chưa có");
-        tvTime.setText(time != null ? "Giờ: " + time : "Giờ: Chưa có");
-        tvMenu.setText(menu != null ? "Menu: " + menu : "Menu: Chưa có");
-        tvTableCount.setText(tableCount > 0 ? "Số bàn: " + tableCount : "Số bàn: Chưa có");
-        tvServices.setText(services != null && !services.isEmpty() ? "Dịch vụ: " + String.join(", ", services) : "Dịch vụ: Không có");
-        tvSubTotalPrice.setText("Tổng phụ: " + currencyFormat.format(totalPrice));
-        tvTotalPrice.setText("Tổng cộng: " + currencyFormat.format(totalPrice));
-
-        Log.d("PaymentActivity", "Booking ID: " + bookingId + ", Tổng tiền: " + totalPrice);
-    }
-
-    private void setupPayment() {
-        btnConfirmPayment.setOnClickListener(v -> processPayment());
-    }
-
-    private void processPayment() {
-        int selectedPaymentId = rgPaymentMethod.getCheckedRadioButtonId();
-        if (selectedPaymentId == -1) {
-            showToast("Vui lòng chọn phương thức thanh toán");
-            return;
+        double menuPrice = (menuId == 1) ? 3550000 : 5000000;
+        double serviceCost = 0;
+        if (serviceIds != null) {
+            for (int serviceId : serviceIds) {
+                switch (serviceId) {
+                    case 1:
+                        serviceCost += 100000;
+                        break;
+                    case 2:
+                        serviceCost += 150000;
+                        break;
+                    case 3:
+                        serviceCost += 200000;
+                        break;
+                }
+            }
         }
 
-        RadioButton selectedPayment = findViewById(selectedPaymentId);
-        String paymentMethod = selectedPayment.getText().toString();
-        double amountPaid = paymentMethod.equals("Đặt cọc 50%") ? totalPrice * 0.5 : totalPrice;
-        String paymentStatus = paymentMethod.equals("Đặt cọc 50%") ? "Đã đặt cọc" : "Đã thanh toán toàn bộ";
+        totalPrice = (tableCount * menuPrice) + serviceCost;
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        tvTotalPrice.setText(formatter.format(totalPrice) + " VNĐ");
+    }
 
-        String fullName = tvFullName.getText().toString().replace("Họ tên: ", "");
-        String email = tvEmail.getText().toString().replace("Email: ", "");
-        String phone = tvPhone.getText().toString().replace("Số điện thoại: ", "");
-        int tableCount = Integer.parseInt(tvTableCount.getText().toString().replace("Số bàn: ", ""));
-        String date = tvDate.getText().toString().replace("Ngày: ", "");
+    private void setupListeners() {
+        btnConfirmPayment.setOnClickListener(this::processPayment);
+    }
+
+    private void processPayment(View v) {
+        Intent intent = getIntent();
+        int userId = intent.getIntExtra("user_id", -1);
+        int restaurantId = intent.getIntExtra("restaurant_id", 1);
+        int tableCount = intent.getIntExtra("table_count", 0);
+        String date = tvDate.getText().toString();
+        String time = tvTime.getText().toString();
+        int menuId = intent.getIntExtra("menu_id", 1);
+        ArrayList<Integer> serviceIds = intent.getIntegerArrayListExtra("service_ids");
+
+        String fullName = tvFullName.getText().toString();
+        String phone = tvPhone.getText().toString();
+        String email = tvEmail.getText().toString();
+        String paymentMethod = rbFullPayment.isChecked() ? "Thanh toán toàn bộ" : "Đặt cọc 50%";
+        String paymentStatus = rbFullPayment.isChecked() ? "Đã thanh toán toàn bộ" : "Đã đặt cọc";
+        double amountPaid = rbDeposit.isChecked() ? totalPrice * 0.5 : totalPrice;
         String note = "";
 
-        long result = dbHelper.addThanhToan(
-                fullName, email, phone, tableCount, date, note, totalPrice, paymentMethod, amountPaid, paymentStatus, bookingId
-        );
-        Log.d("PaymentActivity", "ThanhToan insert result: " + result);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // Lưu booking
+            long bookingId = dbHelper.addBooking(userId, restaurantId, tableCount, date, time, menuId, serviceIds, db);
+            if (bookingId == -1) {
+                throw new Exception("Lưu booking thất bại!");
+            }
 
-        if (result != -1) {
-            showToast("Thanh toán thành công!");
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            // Lưu thanh toán với booking_id
+            long paymentId = dbHelper.addThanhToan(fullName, email, phone, tableCount, date, note, totalPrice,
+                    paymentMethod, amountPaid, paymentStatus, (int) bookingId, db);
+            if (paymentId == -1) {
+                throw new Exception("Lưu thanh toán thất bại!");
+            }
+
+            db.setTransactionSuccessful();
+            Toast.makeText(this, "Thanh toán và đặt tiệc thành công! Booking ID: " + bookingId, Toast.LENGTH_SHORT).show();
+
+            Intent mainIntent = new Intent(this, MainActivity.class);
+            mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(mainIntent);
             finish();
-        } else {
-            showToast("Thanh toán thất bại, vui lòng thử lại!");
-            Log.e("PaymentActivity", "Failed to insert ThanhToan with bookingId: " + bookingId);
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        } finally {
+            db.endTransaction();
+            db.close();
         }
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
