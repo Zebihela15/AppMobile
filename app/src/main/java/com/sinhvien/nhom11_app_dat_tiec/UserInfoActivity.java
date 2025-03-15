@@ -3,16 +3,14 @@ package com.sinhvien.nhom11_app_dat_tiec;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class UserInfoActivity extends AppCompatActivity {
 
-    private TextView tvUserEmail, tvUserId, tvUserName;
+    private TextView tvUserEmail, tvUserId, tvUserName, tvOrderHistory, tvChangePassword;
     private Button btnLogout;
     private DatabaseHelper dbHelper;
 
@@ -26,6 +24,8 @@ public class UserInfoActivity extends AppCompatActivity {
         tvUserId = findViewById(R.id.tvUserId);
         tvUserName = findViewById(R.id.tvUserName);
         btnLogout = findViewById(R.id.btnLogout);
+        tvOrderHistory = findViewById(R.id.tvOrderHistory);
+        tvChangePassword = findViewById(R.id.tvChangePassword);
 
         // Khởi tạo DatabaseHelper
         dbHelper = new DatabaseHelper(this);
@@ -56,6 +56,19 @@ public class UserInfoActivity extends AppCompatActivity {
             Intent intent = new Intent(UserInfoActivity.this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+        });
+
+        // Xử lý sự kiện nút Lịch sử đơn đặt tiệc
+        tvOrderHistory.setOnClickListener(v -> {
+            Intent intent = new Intent(UserInfoActivity.this, OrderHistoryActivity.class);
+            startActivity(intent);
+        });
+
+        // Xử lý sự kiện nút Thay đổi mật khẩu (chưa triển khai, bạn có thể thêm logic sau)
+        tvChangePassword.setOnClickListener(v -> {
+            // TODO: Chuyển đến Activity thay đổi mật khẩu nếu cần
+            // Intent intent = new Intent(UserInfoActivity.this, ChangePasswordActivity.class);
+            // startActivity(intent);
         });
 
         // Xử lý BottomNavigationView

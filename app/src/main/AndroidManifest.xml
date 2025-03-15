@@ -27,7 +27,7 @@
         <activity android:name=".MainActivity" android:exported="true"/>
 
         <activity android:name=".UserInfoActivity"/>
-
+        <activity android:name=".OrderHistoryActivity" />
         <activity android:name=".InfoNhaHang1Activity" />
         <activity android:name=".InfoNhaHang2Activity" />
         <activity android:name=".InfoNhaHang3Activity" />

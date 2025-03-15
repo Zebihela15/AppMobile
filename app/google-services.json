@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "520104481618",
+    "project_id": "appdattiec",
+    "storage_bucket": "appdattiec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:520104481618:android:ec097faad69017ec11608b",
+        "android_client_info": {
+          "package_name": "com.sinhvien.nhom11_app_dat_tiec"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4YAwSjUCriC542Lw9FOjFhb79hYpNeeo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

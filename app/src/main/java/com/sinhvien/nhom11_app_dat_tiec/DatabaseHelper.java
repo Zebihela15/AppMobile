@@ -642,4 +642,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public double getSoTienDaThanhToan() { return soTienDaThanhToan; }
         public String getTrangThaiThanhToan() { return trangThaiThanhToan; }
     }
+    // Thêm vào class DatabaseHelper
+    public List<Booking> getUserBookings(String email) {
+        List<Booking> bookingList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT b.*, r.title AS restaurant_name " +
+                "FROM " + TABLE_BOOKINGS + " b " +
+                "JOIN " + TABLE_RESTAURANTS + " r ON b." + COLUMN_BOOKING_RESTAURANT_ID + " = r." + COLUMN_RESTAURANT_ID + " " +
+                "JOIN " + TABLE_USERS + " u ON b." + COLUMN_BOOKING_USER_ID + " = u." + COLUMN_ID + " " +
+                "WHERE u." + COLUMN_EMAIL + "=?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{email});
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
+                int userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_USER_ID));
+                int restaurantId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_RESTAURANT_ID));
+                int tableCount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_COUNT));
+                String bookingDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE));
+                String bookingTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME));
+                int menuId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_MENU_ID));
+                double totalPrice = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TOTAL_PRICE));
+                String restaurantName = cursor.getString(cursor.getColumnIndexOrThrow("restaurant_name"));
+
+                bookingList.add(new Booking(id, userId, restaurantId, tableCount, bookingDate, bookingTime, menuId, totalPrice, restaurantName));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return bookingList;
+    }
+
+    // Thêm class Booking vào DatabaseHelper
+    public static class Booking {
+        private int id;
+        private int userId;
+        private int restaurantId;
+        private int tableCount;
+        private String bookingDate;
+        private String bookingTime;
+        private int menuId;
+        private double totalPrice;
+        private String restaurantName;
+
+        public Booking(int id, int userId, int restaurantId, int tableCount, String bookingDate, String bookingTime, int menuId, double totalPrice, String restaurantName) {
+            this.id = id;
+            this.userId = userId;
+            this.restaurantId = restaurantId;
+            this.tableCount = tableCount;
+            this.bookingDate = bookingDate;
+            this.bookingTime = bookingTime;
+            this.menuId = menuId;
+            this.totalPrice = totalPrice;
+            this.restaurantName = restaurantName;
+        }
+
+        public int getId() { return id; }
+        public int getUserId() { return userId; }
+        public int getRestaurantId() { return restaurantId; }
+        public int getTableCount() { return tableCount; }
+        public String getBookingDate() { return bookingDate; }
+        public String getBookingTime() { return bookingTime; }
+        public int getMenuId() { return menuId; }
+        public double getTotalPrice() { return totalPrice; }
+        public String getRestaurantName() { return restaurantName; }
+    }
 }
