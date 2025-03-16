@@ -1,179 +1,206 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:background="#f7e6ec">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/main"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <!-- Fragment -->
-        <fragment
-            android:id="@+id/spinnerFragment"
-            android:name="com.sinhvien.nhom11_app_dat_tiec.HomeFragment"
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/navigation">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_height="wrap_content">
 
-        <!-- Search Bar -->
-        <EditText
-            android:id="@+id/searchBar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="Tìm kiếm nhà hàng..."
-            android:padding="12dp"
-            android:background="@android:color/white"
-            android:drawableStart="@drawable/baseline_search_24"
-            android:drawablePadding="8dp"
-            app:layout_constraintTop_toBottomOf="@id/spinnerFragment"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp"
-            android:layout_marginHorizontal="16dp"/>
-
-        <!-- ViewPager2 -->
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/searchBar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent="0.25"
-            android:layout_marginTop="16dp"/>
-
-        <!-- Danh mục dịch vụ -->
-        <TextView
-            android:id="@+id/serviceCategoryTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Danh mục dịch vụ"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/viewPager"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="16dp"
-            android:layout_marginHorizontal="16dp"/>
-
-        <!-- Layout chứa danh mục dịch vụ -->
-        <LinearLayout
-            android:id="@+id/serviceLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            app:layout_constraintTop_toBottomOf="@id/serviceCategoryTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginHorizontal="16dp">
-
-            <!-- Dịch vụ 1 -->
-            <LinearLayout
+            <!-- Search Bar -->
+            <EditText
+                android:id="@+id/searchBar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/ttdc1"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Trang trí tiệc" android:textSize="14sp" android:layout_marginTop="8dp"/>
+                android:hint="Tìm kiếm nhà hàng..."
+                android:padding="12dp"
+                android:background="@android:color/white"
+                android:drawableStart="@drawable/baseline_search_24"
+                android:drawablePadding="8dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="16dp"/>
+
+            <!-- ViewPager2 -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/searchBar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.25"
+                android:layout_marginTop="16dp"/>
+
+            <!-- Danh mục dịch vụ -->
+            <TextView
+                android:id="@+id/serviceCategoryTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Danh mục dịch vụ"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                app:layout_constraintTop_toBottomOf="@id/viewPager"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="16dp"/>
+
+            <!-- Layout chứa danh mục dịch vụ -->
+            <LinearLayout
+                android:id="@+id/serviceLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                app:layout_constraintTop_toBottomOf="@id/serviceCategoryTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="16dp">
+
+                <!-- Dịch vụ 1 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/ttdc1"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Trang trí tiệc" android:textSize="14sp" android:layout_marginTop="8dp"/>
+                </LinearLayout>
+
+                <!-- Dịch vụ 2 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/banhkem"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Trang trí bánh kem" android:textSize="14sp" android:layout_marginTop="8dp"/>
+                </LinearLayout>
+
+                <!-- Dịch vụ 3 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/ttdc3"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Trang trí gia tiên" android:textSize="14sp" android:layout_marginTop="8dp"/>
+                </LinearLayout>
+
+                <!-- Dịch vụ 4 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/dvxe"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Dịch vụ cho thuê xe cưới" android:textSize="14sp" android:layout_marginTop="8dp"/>
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- Dịch vụ 2 -->
-            <LinearLayout
+            <!-- Món chính nổi bật -->
+            <TextView
+                android:id="@+id/featuredDishTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Món chính nổi bật ⭐"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                app:layout_constraintTop_toBottomOf="@id/serviceLayout"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="16dp"/>
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/featuredDishViewPager"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                app:layout_constraintTop_toBottomOf="@id/featuredDishTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Nhà hàng nổi bật -->
+            <TextView
+                android:id="@+id/featuredTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hệ thống nhà hàng của chúng tôi"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                app:layout_constraintTop_toBottomOf="@id/featuredDishViewPager"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="16dp"/>
+
+            <!-- RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/featuredRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/banhkem"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Trang trí bánh kem" android:textSize="14sp" android:layout_marginTop="8dp"/>
-            </LinearLayout>
+                app:layout_constraintTop_toBottomOf="@id/featuredTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="16dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_featured_restaurant"
+                app:spanCount="2"/>
 
-            <!-- Dịch vụ 3 -->
-            <LinearLayout
+            <!-- FrameLayout -->
+            <FrameLayout
+                android:id="@+id/fragment_container"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/ttdc3"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Trang trí gia tiên" android:textSize="14sp" android:layout_marginTop="8dp"/>
-            </LinearLayout>
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@id/featuredRecyclerView"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginHorizontal="16dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
-            <!-- Dịch vụ 4 -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
-                <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/dvxe"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="Dịch vụ cho thuê xe cưới" android:textSize="14sp" android:layout_marginTop="8dp"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Nhà hàng nổi bật -->
-        <TextView
-            android:id="@+id/featuredTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hệ thống nhà hàng của chúng tôi"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/serviceLayout"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="16dp"
-            android:layout_marginHorizontal="16dp"/>
-
-        <!-- RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/featuredRecyclerView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/featuredTitle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginHorizontal="16dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_featured_restaurant"/>
-
-
-        <FrameLayout
-            android:id="@+id/fragment_container"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/featuredRecyclerView"
-            app:layout_constraintBottom_toTopOf="@id/navigation"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginHorizontal="16dp"/>
-
-        <!-- Bottom Navigation -->
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/navigation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/windowBackground"
-            android:elevation="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:menu="@menu/botom_navigation"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/windowBackground"
+        android:elevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:menu="@menu/botom_navigation"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,9 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private ViewPager2 viewPager;
+    private ViewPager2 viewPager; // ViewPager2 cho ảnh nhà hàng
+    private ViewPager2 featuredDishViewPager; // ViewPager2 cho ảnh món ăn
     private Handler autoScrollHandler = new Handler();
     private Runnable autoScrollRunnable;
+    private Handler dishHandler = new Handler();
+    private Runnable dishRunnable;
     private RecyclerView featuredRecyclerView;
     private FeaturedRestaurantAdapter featuredRestaurantAdapter;
     private BottomNavigationView bottomNavigationView;
@@ -45,24 +48,47 @@ public class MainActivity extends AppCompatActivity {
         featuredRestaurantAdapter = new FeaturedRestaurantAdapter(this, restaurantList);
         featuredRecyclerView.setAdapter(featuredRestaurantAdapter);
 
-        // Xử lý ViewPager hiển thị hình ảnh
+        // Xử lý ViewPager hiển thị hình ảnh nhà hàng
         viewPager = findViewById(R.id.viewPager);
         List<Integer> imageList = new ArrayList<>();
         imageList.add(R.drawable.dtc1);
         imageList.add(R.drawable.dtc2);
         imageList.add(R.drawable.dtc3);
+        imageList.add(R.drawable.d25);
+        imageList.add(R.drawable.d31);
 
         ImageAdapter imageAdapter = new ImageAdapter(this, imageList, true);
         viewPager.setAdapter(imageAdapter);
 
+        // Tự động chạy ảnh nhà hàng (3 giây/ảnh)
         autoScrollRunnable = () -> {
             int currentItem = viewPager.getCurrentItem();
             int totalItems = imageAdapter.getItemCount();
             int nextItem = (currentItem + 1) % totalItems;
             viewPager.setCurrentItem(nextItem, true);
-            autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
+            autoScrollHandler.postDelayed(autoScrollRunnable, 3000); // 3 giây
         };
         autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
+
+        // Xử lý ViewPager hiển thị hình ảnh món ăn
+        featuredDishViewPager = findViewById(R.id.featuredDishViewPager);
+        List<Integer> dishImages = new ArrayList<>();
+        dishImages.add(R.drawable.ma1);
+        dishImages.add(R.drawable.ma2);
+        dishImages.add(R.drawable.ma3);
+
+        ImageAdapter dishAdapter = new ImageAdapter(this, dishImages, true);
+        featuredDishViewPager.setAdapter(dishAdapter);
+
+        // Tự động chạy ảnh món ăn (6 giây/ảnh)
+        dishRunnable = () -> {
+            int currentItem = featuredDishViewPager.getCurrentItem();
+            int totalItems = dishAdapter.getItemCount();
+            int nextItem = (currentItem + 1) % totalItems;
+            featuredDishViewPager.setCurrentItem(nextItem, true);
+            dishHandler.postDelayed(dishRunnable, 6000); // 6 giây
+        };
+        dishHandler.postDelayed(dishRunnable, 6000);
 
         // Xử lý BottomNavigationView
         bottomNavigationView = findViewById(R.id.navigation);
@@ -99,18 +125,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        // Dừng tự động chạy khi Activity tạm dừng
         autoScrollHandler.removeCallbacks(autoScrollRunnable);
+        dishHandler.removeCallbacks(dishRunnable);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // Tiếp tục tự động chạy khi Activity được resume
         autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
+        dishHandler.postDelayed(dishRunnable, 6000);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Dừng tự động chạy khi Activity bị hủy
         autoScrollHandler.removeCallbacks(autoScrollRunnable);
+        dishHandler.removeCallbacks(dishRunnable);
     }
 }

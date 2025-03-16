@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#f7e6ec">
 
     <!-- ScrollView chứa nội dung chính -->
     <androidx.core.widget.NestedScrollView
@@ -21,10 +22,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
-
-            <!-- Ảnh nhà hàng -->
-
-            <!-- Tên nhà hàng -->
             <ImageView
                 android:id="@+id/restaurantImage"
                 android:layout_width="0dp"
