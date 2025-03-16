@@ -30,7 +30,7 @@ public class BookingActivity extends AppCompatActivity {
     private RadioButton rbMenu1, rbMenu2;
     private TextView tvTotalPrice;
     private Button btnBook, btnSelectDate, btnIncrease, btnDecrease;
-    private int tableCount = 5;
+    private int tableCount = 5; // Giá trị mặc định
     private double menuPrice = 0;
     private double serviceCost = 0;
     private String selectedDate = "";
@@ -47,7 +47,7 @@ public class BookingActivity extends AppCompatActivity {
         setupListeners();
         updateTotalPrice();
 
-        // Lấy thông tin người dùng từ SharedPreferences và điền vào các trường
+        // Lấy thông tin người dùng từ SharedPreferences
         fillUserInfoFromPrefs();
     }
 
@@ -61,7 +61,7 @@ public class BookingActivity extends AppCompatActivity {
         cbService1 = findViewById(R.id.cbService1);
         cbService2 = findViewById(R.id.cbService2);
         cbService3 = findViewById(R.id.cbService3);
-        rgMenu = findViewById(R.id.rgMenu); // Kiểm tra ID này trong layout
+        rgMenu = findViewById(R.id.rgMenu);
         rbMenu1 = findViewById(R.id.rbMenu1);
         rbMenu2 = findViewById(R.id.rbMenu2);
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
@@ -70,10 +70,8 @@ public class BookingActivity extends AppCompatActivity {
         btnIncrease = findViewById(R.id.btnIncrease);
         btnDecrease = findViewById(R.id.btnDecrease);
 
-        // Đặt giá trị mặc định cho số bàn
         etTableCount.setText(String.valueOf(tableCount));
 
-        // Kiểm tra nếu rgMenu là null
         if (rgMenu == null) {
             Toast.makeText(this, "Lỗi: RadioGroup không được tìm thấy!", Toast.LENGTH_SHORT).show();
         }
@@ -109,15 +107,9 @@ public class BookingActivity extends AppCompatActivity {
                 etFullName.setText(user.getName());
                 etPhone.setText(user.getPhone());
                 etEmail.setText(user.getEmail());
-            } else {
-                Toast.makeText(this, "Không tìm thấy thông tin người dùng!", Toast.LENGTH_SHORT).show();
             }
-        } else {
-            Toast.makeText(this, "Vui lòng đăng nhập trước khi đặt tiệc!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            finish();
         }
+        // Không hiển thị thông báo hoặc chuyển sang LoginActivity nếu không tìm thấy thông tin
     }
 
     private void setupListeners() {
@@ -174,6 +166,14 @@ public class BookingActivity extends AppCompatActivity {
             int restaurantId = spinnerRestaurant.getSelectedItemPosition() + 1;
             String time = spinnerTime.getSelectedItem().toString();
 
+            // Cập nhật tableCount từ EditText trước khi truyền
+            try {
+                tableCount = Integer.parseInt(etTableCount.getText().toString().trim());
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Số bàn không hợp lệ!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             if (name.isEmpty() || phone.isEmpty() || email.isEmpty() || selectedDate.isEmpty()) {
                 Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
                 return;
@@ -211,27 +211,18 @@ public class BookingActivity extends AppCompatActivity {
                 return;
             }
 
-            Toast.makeText(this, "User ID: " + userId, Toast.LENGTH_SHORT).show();
-
-            if (userId != -1) {
-                Intent intent = new Intent(BookingActivity.this, PaymentActivity.class);
-                intent.putExtra("table_count", tableCount);
-                intent.putExtra("menu_id", menuId);
-                intent.putIntegerArrayListExtra("service_ids", (ArrayList<Integer>) serviceIds);
-                intent.putExtra("date", selectedDate);
-                intent.putExtra("time", time);
-                intent.putExtra("full_name", name);
-                intent.putExtra("phone", phone);
-                intent.putExtra("email", email);
-                intent.putExtra("restaurant_id", restaurantId);
-                intent.putExtra("user_id", userId);
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, "Vui lòng đăng nhập trước khi đặt tiệc! User ID: " + userId, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
+            Intent intent = new Intent(BookingActivity.this, PaymentActivity.class);
+            intent.putExtra("table_count", tableCount);
+            intent.putExtra("menu_id", menuId);
+            intent.putIntegerArrayListExtra("service_ids", (ArrayList<Integer>) serviceIds);
+            intent.putExtra("date", selectedDate);
+            intent.putExtra("time", time);
+            intent.putExtra("full_name", name);
+            intent.putExtra("phone", phone);
+            intent.putExtra("email", email);
+            intent.putExtra("restaurant_id", restaurantId);
+            intent.putExtra("user_id", userId);
+            startActivity(intent);
         });
     }
 
@@ -247,10 +238,8 @@ public class BookingActivity extends AppCompatActivity {
         tvTotalPrice.setText("Tổng cộng: " + formattedTotal);
     }
 
-    // Sửa lỗi IllegalFormatConversionException
     private void showBookingSuccessMessage(double total) {
         String message = String.format("Đặt tiệc thành công! Tổng tiền: %.2f VNĐ", total);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
-
 }

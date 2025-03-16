@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +26,8 @@ public class EditBookingActivity extends AppCompatActivity {
     private EditText etTableCount, etFullName, etPhone, etEmail;
     private Button btnDecrease, btnIncrease, btnSelectDate, btnSaveChanges;
     private Spinner spinnerTime;
-    private int bookingId; // Thay từ long thành int
+    private TextView tvOriginalDate; // Thêm TextView cho ngày gốc
+    private int bookingId;
     private int paymentId;
     private String originalDate;
     private int originalMenuId;
@@ -46,8 +48,9 @@ public class EditBookingActivity extends AppCompatActivity {
         btnSelectDate = findViewById(R.id.btnSelectDate);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         spinnerTime = findViewById(R.id.spinnerTime);
+        tvOriginalDate = findViewById(R.id.tvOriginalDate); // Khởi tạo TextView
 
-        bookingId = getIntent().getIntExtra("booking_id", -1); // Sửa từ getLongExtra thành getIntExtra
+        bookingId = getIntent().getIntExtra("booking_id", -1);
         paymentId = getIntent().getIntExtra("payment_id", -1);
         originalDate = getIntent().getStringExtra("original_date");
         Log.d("EditBooking", "Booking ID: " + bookingId + ", Payment ID: " + paymentId);
@@ -56,6 +59,13 @@ public class EditBookingActivity extends AppCompatActivity {
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, timeOptions);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTime.setAdapter(timeAdapter);
+
+        // Hiển thị ngày gốc
+        if (originalDate != null && !originalDate.isEmpty()) {
+            tvOriginalDate.setText("Ngày gốc: " + originalDate);
+        } else {
+            tvOriginalDate.setText("Ngày gốc: Không có dữ liệu");
+        }
 
         loadBookingDetails();
 
