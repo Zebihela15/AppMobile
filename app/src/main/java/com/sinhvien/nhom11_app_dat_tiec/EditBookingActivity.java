@@ -1,6 +1,7 @@
 package com.sinhvien.nhom11_app_dat_tiec;
 
 import android.app.DatePickerDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -26,7 +27,7 @@ public class EditBookingActivity extends AppCompatActivity {
     private EditText etTableCount, etFullName, etPhone, etEmail;
     private Button btnDecrease, btnIncrease, btnSelectDate, btnSaveChanges;
     private Spinner spinnerTime;
-    private TextView tvOriginalDate; // Thêm TextView cho ngày gốc
+    private TextView tvOriginalDate;
     private int bookingId;
     private int paymentId;
     private String originalDate;
@@ -48,7 +49,7 @@ public class EditBookingActivity extends AppCompatActivity {
         btnSelectDate = findViewById(R.id.btnSelectDate);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         spinnerTime = findViewById(R.id.spinnerTime);
-        tvOriginalDate = findViewById(R.id.tvOriginalDate); // Khởi tạo TextView
+        tvOriginalDate = findViewById(R.id.tvOriginalDate);
 
         bookingId = getIntent().getIntExtra("booking_id", -1);
         paymentId = getIntent().getIntExtra("payment_id", -1);
@@ -60,7 +61,6 @@ public class EditBookingActivity extends AppCompatActivity {
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTime.setAdapter(timeAdapter);
 
-        // Hiển thị ngày gốc
         if (originalDate != null && !originalDate.isEmpty()) {
             tvOriginalDate.setText("Ngày gốc: " + originalDate);
         } else {
@@ -92,30 +92,35 @@ public class EditBookingActivity extends AppCompatActivity {
     }
 
     private void loadBookingDetails() {
-        String userIdStr = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("user_id", "-1");
-        int userId;
-        try {
-            userId = Integer.parseInt(userIdStr);
-        } catch (NumberFormatException e) {
-            userId = -1;
-        }
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String userId = sharedPreferences.getString("user_id", null);
 
-        if (userId == -1) {
-            Toast.makeText(this, "Không tìm thấy user ID", Toast.LENGTH_SHORT).show();
+        if (userId == null) {
+            Toast.makeText(this, "Không tìm thấy user ID. Vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        List<DatabaseHelper.Booking> bookings = dbHelper.getUserBookings(userId);
-        DatabaseHelper.Booking currentBooking = null;
-        for (DatabaseHelper.Booking booking : bookings) {
-            if (booking.getId() == bookingId) {
-                currentBooking = booking;
-                break;
-            }
-        }
+        DatabaseHelper.Booking currentBooking = dbHelper.getBookingById(bookingId);
 
         if (currentBooking != null) {
+            // Kiểm tra ngày diễn ra để ngăn chỉnh sửa nếu đã qua
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            try {
+                Date bookingDate = sdf.parse(currentBooking.getDate());
+                Date currentDate = new Date();
+                if (bookingDate != null && bookingDate.before(currentDate)) {
+                    Toast.makeText(this, "Không thể chỉnh sửa booking đã diễn ra!", Toast.LENGTH_SHORT).show();
+                    btnSaveChanges.setEnabled(false);
+                    btnDecrease.setEnabled(false);
+                    btnIncrease.setEnabled(false);
+                    btnSelectDate.setEnabled(false);
+                    spinnerTime.setEnabled(false);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
             etTableCount.setText(String.valueOf(currentBooking.getTableCount()));
             btnSelectDate.setText(currentBooking.getDate());
             spinnerTime.setSelection(((ArrayAdapter<String>) spinnerTime.getAdapter()).getPosition(currentBooking.getTime()));
@@ -143,6 +148,11 @@ public class EditBookingActivity extends AppCompatActivity {
                     String selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
                     btnSelectDate.setText(selectedDate);
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+
+        Calendar minDate = Calendar.getInstance();
+        minDate.add(Calendar.DAY_OF_MONTH, 14);
+        datePickerDialog.getDatePicker().setMinDate(minDate.getTimeInMillis());
+
         datePickerDialog.show();
     }
 
@@ -150,11 +160,24 @@ public class EditBookingActivity extends AppCompatActivity {
         int tableCount = Integer.parseInt(etTableCount.getText().toString());
         String newDate = btnSelectDate.getText().toString();
         String newTime = spinnerTime.getSelectedItem().toString();
-        String fullName = etFullName.getText().toString();
-        String phone = etPhone.getText().toString();
-        String email = etEmail.getText().toString();
+        String fullName = etFullName.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
 
-        Log.d("EditBooking", "Saving - Table Count: " + tableCount);
+        if (fullName.isEmpty() || phone.isEmpty() || email.isEmpty()) {
+            Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Email không hợp lệ!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!phone.matches("^0\\d{9,10}$")) {
+            Toast.makeText(this, "Số điện thoại không hợp lệ!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         try {
@@ -164,8 +187,15 @@ public class EditBookingActivity extends AppCompatActivity {
             minChangeDate.setTime(original);
             minChangeDate.add(Calendar.DAY_OF_MONTH, -5);
 
+            Calendar minFutureDate = Calendar.getInstance();
+            minFutureDate.add(Calendar.DAY_OF_MONTH, 14);
+
             if (newSelected.before(minChangeDate.getTime())) {
                 Toast.makeText(this, "Chỉ có thể thay đổi ngày trước 5 ngày so với ngày gốc!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (newSelected.before(minFutureDate.getTime())) {
+                Toast.makeText(this, "Ngày đặt tiệc phải sau ít nhất 14 ngày kể từ hôm nay!", Toast.LENGTH_SHORT).show();
                 return;
             }
         } catch (ParseException e) {
@@ -179,15 +209,9 @@ public class EditBookingActivity extends AppCompatActivity {
             double serviceCost = 0;
             for (int serviceId : originalServiceIds) {
                 switch (serviceId) {
-                    case 1:
-                        serviceCost += 100000;
-                        break;
-                    case 2:
-                        serviceCost += 150000;
-                        break;
-                    case 3:
-                        serviceCost += 200000;
-                        break;
+                    case 1: serviceCost += 100000; break;
+                    case 2: serviceCost += 150000; break;
+                    case 3: serviceCost += 200000; break;
                 }
             }
             double newTotalPrice = (tableCount * menuPrice) + serviceCost;
@@ -195,9 +219,10 @@ public class EditBookingActivity extends AppCompatActivity {
             DatabaseHelper.ThanhToan thanhToan = dbHelper.getThanhToan(paymentId);
             String paymentMethod = thanhToan != null ? thanhToan.getPhuongThucThanhToan() : "Đặt cọc 50%";
             double amountPaid = thanhToan != null ? thanhToan.getSoTienDaThanhToan() : newTotalPrice * 0.5;
+            String paymentStatus = thanhToan != null ? thanhToan.getTrangThaiThanhToan() : "Đã thanh toán";
 
             boolean paymentUpdated = dbHelper.updateThanhToan(paymentId, fullName, email, phone, tableCount, newDate, "",
-                    newTotalPrice, paymentMethod, amountPaid, "Đã thanh toán");
+                    newTotalPrice, paymentMethod, amountPaid, paymentStatus);
             if (paymentUpdated) {
                 Toast.makeText(this, "Cập nhật đơn hàng thành công!", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);

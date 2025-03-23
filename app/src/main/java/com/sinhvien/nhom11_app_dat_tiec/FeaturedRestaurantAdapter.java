@@ -33,7 +33,7 @@ public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRest
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         DatabaseHelper.Restaurant restaurant = restaurantList.get(position);
-        holder.featuredImage.setImageResource(restaurant.getImage());
+
         holder.featuredTitle.setText(restaurant.getTitle());
         holder.featuredDescription.setText(restaurant.getDescription());
 

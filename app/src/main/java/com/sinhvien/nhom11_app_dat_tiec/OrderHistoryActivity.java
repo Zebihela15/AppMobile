@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -26,19 +27,20 @@ public class OrderHistoryActivity extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
         lvOrders = findViewById(R.id.lvOrders);
 
-        // Lấy user_id từ SharedPreferences dưới dạng String rồi chuyển sang int
-        String userIdStr = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("user_id", "-1");
-        int userId;
-        try {
-            userId = Integer.parseInt(userIdStr);
-        } catch (NumberFormatException e) {
-            userId = -1;
-        }
+        // Lấy user_id từ SharedPreferences dưới dạng String
+        String userId = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("user_id", null);
 
-        if (userId != -1) {
+        if (userId != null) {
             List<DatabaseHelper.Order> orders = dbHelper.getOrderHistory(userId);
-            OrderAdapter adapter = new OrderAdapter(orders);
-            lvOrders.setAdapter(adapter);
+            if (orders.isEmpty()) {
+                Toast.makeText(this, "Bạn chưa có lịch sử đơn hàng!", Toast.LENGTH_SHORT).show();
+            } else {
+                OrderAdapter adapter = new OrderAdapter(orders);
+                lvOrders.setAdapter(adapter);
+            }
+        } else {
+            Toast.makeText(this, "Không tìm thấy user ID. Vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
@@ -70,6 +72,18 @@ public class OrderHistoryActivity extends AppCompatActivity {
             });
 
             return convertView;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cập nhật lại danh sách khi quay lại từ EditBookingActivity
+        String userId = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("user_id", null);
+        if (userId != null) {
+            List<DatabaseHelper.Order> orders = dbHelper.getOrderHistory(userId);
+            OrderAdapter adapter = new OrderAdapter(orders);
+            lvOrders.setAdapter(adapter);
         }
     }
 }

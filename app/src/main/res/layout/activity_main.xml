@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#f7e6ec">
-
+    android:background="#FFF8FA">
 
     <ScrollView
         android:layout_width="0dp"
@@ -21,122 +20,303 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- Search Bar -->
-            <EditText
-                android:id="@+id/searchBar"
+            <!-- Header Bar -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/headerBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="20dp"
+                android:background="@drawable/header_gradient_bg"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/appTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Wedding Paradise"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/welcomeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chào mừng đến với dịch vụ đặt tiệc cưới"
+                    android:textSize="17sp"
+                    android:textColor="#FFFFFF"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/appTitle"
+                    android:layout_marginTop="4dp" />
+
+                <ImageView
+                    android:id="@+id/notificationIcon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_notifications"
+                    android:padding="4dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/appTitle"
+                    app:layout_constraintBottom_toBottomOf="@id/welcomeText" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Search Bar with rounded corners - adjusted margin -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/searchBarCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="Tìm kiếm nhà hàng..."
-                android:padding="12dp"
-                android:background="@android:color/white"
-                android:drawableStart="@drawable/baseline_search_24"
-                android:drawablePadding="8dp"
-                app:layout_constraintTop_toTopOf="parent"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="-16dp"
+                app:layout_constraintTop_toBottomOf="@id/headerBar"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="16dp"
-                android:layout_marginHorizontal="16dp"/>
+                app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- ViewPager2 -->
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/viewPager"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintTop_toBottomOf="@id/searchBar"
+                <EditText
+                    android:id="@+id/searchBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="Tìm kiếm nhà hàng tiệc cưới..."
+                    android:padding="12dp"
+                    android:background="@android:color/white"
+                    android:drawableStart="@drawable/baseline_search_24"
+                    android:drawablePadding="8dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Banner Slider -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/bannerCard"
+                android:layout_width="0dp"
+                android:layout_height="180dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintTop_toBottomOf="@id/searchBarCard"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.25"
-                android:layout_marginTop="16dp"/>
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Indicator dots for the ViewPager -->
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabDots"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                app:tabBackground="@drawable/tab_selector"
+                app:tabGravity="center"
+                app:tabIndicatorHeight="0dp"
+                app:layout_constraintTop_toBottomOf="@id/bannerCard"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <!-- Danh mục dịch vụ -->
             <TextView
                 android:id="@+id/serviceCategoryTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Danh mục dịch vụ"
-                android:textSize="20sp"
+                android:text="Dịch Vụ Cưới Hỏi"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
-                app:layout_constraintTop_toBottomOf="@id/viewPager"
+                app:layout_constraintTop_toBottomOf="@id/tabDots"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginTop="16dp"
-                android:layout_marginHorizontal="16dp"/>
+                android:layout_marginStart="20dp" />
 
-            <!-- Layout chứa danh mục dịch vụ -->
-            <LinearLayout
+            <!-- Service Categories - Smaller Layout -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/serviceLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
                 app:layout_constraintTop_toBottomOf="@id/serviceCategoryTitle"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="16dp">
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="24dp">
 
-                <!-- Dịch vụ 1 -->
+                <!-- Row 1 -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/serviceRow1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/ttdc1"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Trang trí tiệc" android:textSize="14sp" android:layout_marginTop="8dp"/>
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <!-- Dịch vụ 1 -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/service1Card"
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/ttdc1"
+                                android:scaleType="centerCrop" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Trang trí tiệc"
+                                android:textSize="12sp"
+                                android:textAlignment="center"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Dịch vụ 2 -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/service2Card"
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/banhkem"
+                                android:scaleType="centerCrop" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Trang trí bánh kem"
+                                android:textSize="12sp"
+                                android:textAlignment="center"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
-                <!-- Dịch vụ 2 -->
+                <!-- Row 2 -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/serviceRow2"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/banhkem"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Trang trí bánh kem" android:textSize="14sp" android:layout_marginTop="8dp"/>
-                </LinearLayout>
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_marginTop="12dp"
+                    app:layout_constraintTop_toBottomOf="@id/serviceRow1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-                <!-- Dịch vụ 3 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/ttdc3"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Trang trí gia tiên" android:textSize="14sp" android:layout_marginTop="8dp"/>
-                </LinearLayout>
+                    <!-- Dịch vụ 3 -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/service3Card"
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="2dp">
 
-                <!-- Dịch vụ 4 -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <ImageView android:layout_width="60dp" android:layout_height="60dp" android:src="@drawable/dvxe"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Dịch vụ cho thuê xe cưới" android:textSize="14sp" android:layout_marginTop="8dp"/>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/ttdc3"
+                                android:scaleType="centerCrop" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Trang trí gia tiên"
+                                android:textSize="12sp"
+                                android:textAlignment="center"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Dịch vụ 4 -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/service4Card"
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/dvxe"
+                                android:scaleType="centerCrop" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Dịch vụ cho thuê xe"
+                                android:textSize="12sp"
+                                android:textAlignment="center"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Món chính nổi bật -->
             <TextView
                 android:id="@+id/featuredDishTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Món chính nổi bật ⭐"
-                android:textSize="20sp"
+                android:text="Món Chính Nổi Bật ⭐"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
                 app:layout_constraintTop_toBottomOf="@id/serviceLayout"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="16dp"
-                android:layout_marginHorizontal="16dp"/>
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="20dp" />
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/featuredDishViewPager"
@@ -144,51 +324,50 @@
                 android:layout_height="220dp"
                 android:clipToPadding="false"
                 android:clipChildren="false"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
                 app:layout_constraintTop_toBottomOf="@id/featuredDishTitle"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"/>
+                android:layout_marginTop="12dp" />
 
-            <!-- Nhà hàng nổi bật -->
+            <!-- Nhà hàng -->
             <TextView
-                android:id="@+id/featuredTitle"
+                android:id="@+id/featuredRestaurantTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hệ thống nhà hàng của chúng tôi"
-                android:textSize="20sp"
+                android:text="Hệ Thống Nhà Hàng"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#333333"
                 app:layout_constraintTop_toBottomOf="@id/featuredDishViewPager"
                 app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="16dp"
-                android:layout_marginHorizontal="16dp"/>
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="20dp" />
 
-            <!-- RecyclerView -->
+            <!-- RecyclerView for restaurants -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/featuredRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/featuredTitle"
+                android:clipToPadding="false"
+                android:paddingHorizontal="12dp"
+                app:layout_constraintTop_toBottomOf="@id/featuredRestaurantTitle"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="16dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="24dp"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="2"
                 tools:listitem="@layout/item_featured_restaurant"
-                app:spanCount="2"/>
+                tools:itemCount="4" />
 
-            <!-- FrameLayout -->
-            <FrameLayout
-                android:id="@+id/fragment_container"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
+            <!-- Padding space at the bottom -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
                 app:layout_constraintTop_toBottomOf="@id/featuredRecyclerView"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginHorizontal="16dp"/>
+                app:layout_constraintBottom_toBottomOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
@@ -197,10 +376,12 @@
         android:id="@+id/navigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?android:attr/windowBackground"
-        android:elevation="0dp"
+        android:background="@android:color/white"
+        app:itemIconTint="@drawable/bottom_nav_selector"
+        app:itemTextColor="@drawable/bottom_nav_selector"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/botom_navigation"/>
+        app:menu="@menu/botom_navigation" />
 </androidx.constraintlayout.widget.ConstraintLayout>

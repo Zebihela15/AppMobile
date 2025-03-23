@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "520104481618",
-    "project_id": "appdattiec",
-    "storage_bucket": "appdattiec.firebasestorage.app"
+    "project_number": "555568655850",
+    "firebase_url": "https://nhom11-app-tiec-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "nhom11-app-tiec",
+    "storage_bucket": "nhom11-app-tiec.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:520104481618:android:ec097faad69017ec11608b",
+        "mobilesdk_app_id": "1:555568655850:android:86ca625f313769bfb01693",
         "android_client_info": {
           "package_name": "com.sinhvien.nhom11_app_dat_tiec"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA4YAwSjUCriC542Lw9FOjFhb79hYpNeeo"
+          "current_key": "AIzaSyCxKX3Wafpdz4xHqJsRoqS2vH6c6czv1cQ"
         }
       ],
       "services": {

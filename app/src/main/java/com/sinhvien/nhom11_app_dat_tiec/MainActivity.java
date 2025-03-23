@@ -6,15 +6,19 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.ImageView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-import com.sinhvien.nhom11_app_dat_tiec.DatabaseHelper.Restaurant;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-import android.widget.EditText;
+import com.sinhvien.nhom11_app_dat_tiec.DatabaseHelper.Restaurant;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private FeaturedRestaurantAdapter featuredRestaurantAdapter;
     private BottomNavigationView bottomNavigationView;
     private EditText searchBar;
+    private ImageView notificationIcon; // Khai báo biến notificationIcon
     private DatabaseHelper databaseHelper;
 
     @Override
@@ -96,13 +101,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
-                if (itemId == R.id.nav_person) {
+                if (itemId == R.id.navigation_profile) {
                     startActivity(new Intent(MainActivity.this, UserInfoActivity.class));
                     return true;
                 }
                 return false;
             }
         });
+
+        // Xử lý nút thông báo
+        notificationIcon = findViewById(R.id.notificationIcon);
+        if (notificationIcon != null) {
+            notificationIcon.setOnClickListener(v -> {
+                // Chuyển hướng đến NotificationActivity
+                Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
+                startActivity(intent);
+            });
+        }
 
         // Xử lý tìm kiếm
         searchBar = findViewById(R.id.searchBar);

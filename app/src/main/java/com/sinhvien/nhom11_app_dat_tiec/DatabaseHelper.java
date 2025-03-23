@@ -17,15 +17,15 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Userdatabase.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     // Bảng users
     private static final String TABLE_USERS = "users";
     private static final String COLUMN_ID = "id";
+    private static final String COLUMN_USER_ID = "user_id";
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_PHONE = "phone";
     private static final String COLUMN_EMAIL = "email";
-    private static final String COLUMN_PASSWORD = "password";
 
     // Bảng restaurants
     private static final String TABLE_RESTAURANTS = "restaurants";
@@ -85,10 +85,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_USER_ID + " TEXT UNIQUE, " +
                 COLUMN_NAME + " TEXT, " +
                 COLUMN_PHONE + " TEXT, " +
-                COLUMN_EMAIL + " TEXT UNIQUE, " +
-                COLUMN_PASSWORD + " TEXT)";
+                COLUMN_EMAIL + " TEXT UNIQUE)";
         db.execSQL(CREATE_USERS_TABLE);
 
         String CREATE_RESTAURANTS_TABLE = "CREATE TABLE " + TABLE_RESTAURANTS + " (" +
@@ -112,14 +112,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String CREATE_BOOKINGS_TABLE = "CREATE TABLE " + TABLE_BOOKINGS + " (" +
                 COLUMN_BOOKING_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_BOOKING_USER_ID + " INTEGER, " +
+                COLUMN_BOOKING_USER_ID + " TEXT, " +
                 COLUMN_BOOKING_RESTAURANT_ID + " INTEGER, " +
                 COLUMN_BOOKING_TABLE_COUNT + " INTEGER, " +
                 COLUMN_BOOKING_DATE + " TEXT, " +
                 COLUMN_BOOKING_TIME + " TEXT, " +
                 COLUMN_BOOKING_MENU_ID + " INTEGER, " +
                 COLUMN_BOOKING_TOTAL_PRICE + " REAL, " +
-                "FOREIGN KEY(" + COLUMN_BOOKING_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_ID + "), " +
                 "FOREIGN KEY(" + COLUMN_BOOKING_RESTAURANT_ID + ") REFERENCES " + TABLE_RESTAURANTS + "(" + COLUMN_RESTAURANT_ID + "), " +
                 "FOREIGN KEY(" + COLUMN_BOOKING_MENU_ID + ") REFERENCES " + TABLE_MENUS + "(" + COLUMN_MENU_ID + "))";
         db.execSQL(CREATE_BOOKINGS_TABLE);
@@ -143,40 +142,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_TT_PHUONGTHUC + " TEXT, " +
                 COLUMN_TT_SOTIENDATHANHTOAN + " REAL, " +
                 COLUMN_TT_TRANGTHAI + " TEXT, " +
-                COLUMN_TT_BOOKING_ID + " INTEGER, " + // Thay từ long thành int
+                COLUMN_TT_BOOKING_ID + " INTEGER, " +
                 "FOREIGN KEY(" + COLUMN_TT_BOOKING_ID + ") REFERENCES " + TABLE_BOOKINGS + "(" + COLUMN_BOOKING_ID + "))";
         db.execSQL(CREATE_THANHTOAN_TABLE);
 
         insertInitialRestaurants(db);
         insertInitialMenus(db);
         insertInitialServices(db);
-        insertInitialUsers(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < newVersion) {
-            if (oldVersion < 7) {
-                try {
-                    db.execSQL("ALTER TABLE " + TABLE_THANHTOAN + " ADD COLUMN " + COLUMN_TT_BOOKING_ID + " INTEGER DEFAULT 0");
-                    db.execSQL("CREATE INDEX IF NOT EXISTS idx_thanhtoan_booking_id ON " + TABLE_THANHTOAN + " (" + COLUMN_TT_BOOKING_ID + ")");
-                } catch (Exception e) {
-                    // Bỏ qua nếu cột đã tồn tại
-                }
-            }
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_RESTAURANTS);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MENUS);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_SERVICES);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKING_SERVICES);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_THANHTOAN);
+            onCreate(db);
         }
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_RESTAURANTS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MENUS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SERVICES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKINGS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKING_SERVICES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_THANHTOAN);
-        onCreate(db);
+        onUpgrade(db, oldVersion, newVersion);
     }
 
     private void insertInitialRestaurants(SQLiteDatabase db) {
@@ -218,18 +209,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.insert(TABLE_SERVICES, null, values);
     }
 
-    private void insertInitialUsers(SQLiteDatabase db) {
-        insertUser(db, "Nguyen Van A", "0123456789", "user1@example.com", "password1");
-        insertUser(db, "Tran Thi B", "0987654321", "user2@example.com", "password2");
-    }
-
-    private void insertUser(SQLiteDatabase db, String name, String phone, String email, String password) {
+    public boolean addUser(String userId, String name, String phone, String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(COLUMN_USER_ID, userId);
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_PHONE, phone);
         values.put(COLUMN_EMAIL, email);
-        values.put(COLUMN_PASSWORD, password);
-        db.insert(TABLE_USERS, null, values);
+        long result = db.insert(TABLE_USERS, null, values);
+        db.close();
+        return result != -1;
+    }
+
+    public boolean isPhoneExists(String phone) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_PHONE + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{phone});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return exists;
     }
 
     public boolean checkUserExists(String email) {
@@ -242,42 +241,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    public boolean addUser(String name, String phone, String email, String password) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME, name);
-        values.put(COLUMN_PHONE, phone);
-        values.put(COLUMN_EMAIL, email);
-        values.put(COLUMN_PASSWORD, password);
-        long result = db.insert(TABLE_USERS, null, values);
-        db.close();
-        return result != -1;
-    }
-
-    public boolean checkLogin(String email, String password) {
+    public User getUserInfo(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + " = ? AND " + COLUMN_PASSWORD + " = ?",
-                new String[]{email, password});
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
-        return exists;
-    }
-
-    public int getUserId(String email, String password) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        int userId = -1;
-        Cursor cursor = db.rawQuery("SELECT " + COLUMN_ID + " FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + " = ? AND " + COLUMN_PASSWORD + " = ?",
-                new String[]{email, password});
+        User user = null;
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + " = ?", new String[]{email});
         if (cursor.moveToFirst()) {
-            userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            String userId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ID));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
+            String phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE));
+            String userEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL));
+            user = new User(id, userId, name, phone, userEmail);
         }
         cursor.close();
         db.close();
-        return userId;
+        return user;
     }
 
-    public int addBooking(int userId, int restaurantId, int tableCount, String date, String time, int menuId, List<Integer> serviceIds, SQLiteDatabase db) {
+    public User getUserByUserId(String userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        User user = null;
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_USER_ID + " = ?", new String[]{userId});
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            String firebaseUserId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_ID));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
+            String phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE));
+            String email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL));
+            user = new User(id, firebaseUserId, name, phone, email);
+        }
+        cursor.close();
+        db.close();
+        return user;
+    }
+
+    public int addBooking(String userId, int restaurantId, int tableCount, String date, String time, int menuId, List<Integer> serviceIds, SQLiteDatabase db) {
         if (tableCount < 5 || tableCount > 50) return -1;
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -330,13 +328,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.insert(TABLE_BOOKING_SERVICES, null, serviceValues);
         }
 
-        return (int) bookingId; // Ép kiểu về int
+        return (int) bookingId;
     }
 
     public int addThanhToan(String hoTen, String email, String soDienThoai, int soLuongBan,
                             String ngayDatTiec, String ghiChu, double tongTien,
                             String phuongThucThanhToan, double soTienDaThanhToan,
-                            String trangThaiThanhToan, int bookingId, SQLiteDatabase db) { // Thay long thành int
+                            String trangThaiThanhToan, int bookingId, SQLiteDatabase db) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_TT_HOTEN, hoTen);
         values.put(COLUMN_TT_EMAIL, email);
@@ -351,7 +349,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_TT_BOOKING_ID, bookingId);
 
         long id = db.insert(TABLE_THANHTOAN, null, values);
-        return (int) id; // Ép kiểu về int
+        return (int) id;
     }
 
     public List<Restaurant> searchRestaurants(String query) {
@@ -425,24 +423,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return restaurantList;
     }
 
-    public User getUserInfo(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        User user = null;
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COLUMN_EMAIL + " = ?", new String[]{email});
-        if (cursor.moveToFirst()) {
-            int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-            String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
-            String phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE));
-            String userEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL));
-            String password = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD));
-            user = new User(id, name, phone, userEmail, password);
-        }
-        cursor.close();
-        db.close();
-        return user;
-    }
-
-    public List<Order> getOrderHistory(int userId) {
+    public List<Order> getOrderHistory(String userId) {
         List<Order> orderList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT b." + COLUMN_BOOKING_ID + ", b." + COLUMN_BOOKING_TABLE_COUNT + ", b." + COLUMN_BOOKING_DATE + ", b." + COLUMN_BOOKING_TIME + ", " +
@@ -453,7 +434,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " LEFT JOIN " + TABLE_RESTAURANTS + " r ON b." + COLUMN_BOOKING_RESTAURANT_ID + " = r." + COLUMN_RESTAURANT_ID +
                 " LEFT JOIN " + TABLE_MENUS + " m ON b." + COLUMN_BOOKING_MENU_ID + " = m." + COLUMN_MENU_ID +
                 " WHERE b." + COLUMN_BOOKING_USER_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+        Cursor cursor = db.rawQuery(query, new String[]{userId});
         if (cursor.moveToFirst()) {
             do {
                 int bookingId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
@@ -476,7 +457,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return orderList;
     }
 
-    public boolean updateBooking(int bookingId, int tableCount, String date, String time, int menuId, List<Integer> serviceIds) { // Thay long thành int
+    public boolean updateBooking(int bookingId, int tableCount, String date, String time, int menuId, List<Integer> serviceIds) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         double menuPrice = 0;
@@ -522,7 +503,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean updateThanhToan(int paymentId, String hoTen, String email, String soDienThoai, int soLuongBan,
                                    String ngayDatTiec, String ghiChu, double tongTien, String phuongThucThanhToan,
-                                   double soTienDaThanhToan, String trangThaiThanhToan) { // Thay long thành int
+                                   double soTienDaThanhToan, String trangThaiThanhToan) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TT_HOTEN, hoTen);
@@ -541,11 +522,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rowsAffected > 0;
     }
 
-    public List<Booking> getUserBookings(int userId) {
+    public List<Booking> getUserBookings(String userId) {
         List<Booking> bookingList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_BOOKINGS + " WHERE " + COLUMN_BOOKING_USER_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+        Cursor cursor = db.rawQuery(query, new String[]{userId});
         if (cursor.moveToFirst()) {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
@@ -563,7 +544,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return bookingList;
     }
 
-    public List<Integer> getServiceIdsForBooking(int bookingId) { // Thay long thành int
+    public List<Integer> getServiceIdsForBooking(int bookingId) {
         List<Integer> serviceIds = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT " + COLUMN_BS_SERVICE_ID + " FROM " + TABLE_BOOKING_SERVICES +
@@ -579,7 +560,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return serviceIds;
     }
 
-    public ThanhToan getThanhToan(int maThanhToan) { // Thay long thành int
+    public ThanhToan getThanhToan(int maThanhToan) {
         SQLiteDatabase db = this.getReadableDatabase();
         ThanhToan thanhToan = null;
 
@@ -598,7 +579,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String phuongThucThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_PHUONGTHUC));
             double soTienDaThanhToan = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TT_SOTIENDATHANHTOAN));
             String trangThaiThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_TRANGTHAI));
-            int bookingId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_BOOKING_ID)); // Thay long thành int
+            int bookingId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_BOOKING_ID));
 
             thanhToan = new ThanhToan(id, hoTen, email, soDienThoai, soLuongBan, ngayDatTiec, ghiChu,
                     tongTien, phuongThucThanhToan, soTienDaThanhToan, trangThaiThanhToan, bookingId);
@@ -628,7 +609,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String phuongThucThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_PHUONGTHUC));
                 double soTienDaThanhToan = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TT_SOTIENDATHANHTOAN));
                 String trangThaiThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_TRANGTHAI));
-                int bookingId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_BOOKING_ID)); // Thay long thành int
+                int bookingId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_BOOKING_ID));
 
                 ThanhToan thanhToan = new ThanhToan(id, hoTen, email, soDienThoai, soLuongBan, ngayDatTiec, ghiChu,
                         tongTien, phuongThucThanhToan, soTienDaThanhToan, trangThaiThanhToan, bookingId);
@@ -641,7 +622,61 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return thanhToanList;
     }
 
-    // Các class nội bộ
+    public Booking getBookingById(int bookingId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Booking booking = null;
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_BOOKINGS + " WHERE " + COLUMN_BOOKING_ID + " = ?",
+                new String[]{String.valueOf(bookingId)});
+
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID));
+            String userId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_USER_ID));
+            int restaurantId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_RESTAURANT_ID));
+            int tableCount = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_COUNT));
+            String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE));
+            String time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME));
+            int menuId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_MENU_ID));
+            double totalPrice = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TOTAL_PRICE));
+
+            booking = new Booking(id, userId, restaurantId, tableCount, date, time, menuId, totalPrice);
+        }
+
+        cursor.close();
+        db.close();
+        return booking;
+    }
+
+    public ThanhToan getThanhToanByBookingId(int bookingId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ThanhToan thanhToan = null;
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_THANHTOAN + " WHERE " + COLUMN_TT_BOOKING_ID + " = ?",
+                new String[]{String.valueOf(bookingId)});
+
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_ID));
+            String hoTen = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_HOTEN));
+            String email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_EMAIL));
+            String soDienThoai = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_SODIENTHOAI));
+            int soLuongBan = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_SOLUONGBAN));
+            String ngayDatTiec = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_NGAYDATTIEC));
+            String ghiChu = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_GHICHU));
+            double tongTien = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TT_TONGTIEN));
+            String phuongThucThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_PHUONGTHUC));
+            double soTienDaThanhToan = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TT_SOTIENDATHANHTOAN));
+            String trangThaiThanhToan = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TT_TRANGTHAI));
+            int bookingIdFromDb = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TT_BOOKING_ID));
+
+            thanhToan = new ThanhToan(id, hoTen, email, soDienThoai, soLuongBan, ngayDatTiec, ghiChu,
+                    tongTien, phuongThucThanhToan, soTienDaThanhToan, trangThaiThanhToan, bookingIdFromDb);
+        }
+
+        cursor.close();
+        db.close();
+        return thanhToan;
+    }
+
     public static class Menu {
         private int id;
         private String title;
@@ -695,24 +730,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static class User {
         private int id;
+        private String userId;
         private String name;
         private String phone;
         private String email;
-        private String password;
 
-        public User(int id, String name, String phone, String email, String password) {
+        public User(int id, String userId, String name, String phone, String email) {
             this.id = id;
+            this.userId = userId;
             this.name = name;
             this.phone = phone;
             this.email = email;
-            this.password = password;
         }
 
         public int getId() { return id; }
+        public String getUserId() { return userId; }
         public String getName() { return name; }
         public String getPhone() { return phone; }
         public String getEmail() { return email; }
-        public String getPassword() { return password; }
     }
 
     public static class Order {
@@ -759,7 +794,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static class Booking {
         private int id;
-        private int userId;
+        private String userId;
         private int restaurantId;
         private int tableCount;
         private String date;
@@ -767,7 +802,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         private int menuId;
         private double totalPrice;
 
-        public Booking(int id, int userId, int restaurantId, int tableCount, String date, String time, int menuId, double totalPrice) {
+        public Booking(int id, String userId, int restaurantId, int tableCount, String date, String time, int menuId, double totalPrice) {
             this.id = id;
             this.userId = userId;
             this.restaurantId = restaurantId;
@@ -779,7 +814,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         public int getId() { return id; }
-        public int getUserId() { return userId; }
+        public String getUserId() { return userId; }
         public int getRestaurantId() { return restaurantId; }
         public int getTableCount() { return tableCount; }
         public String getDate() { return date; }
@@ -789,7 +824,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public static class ThanhToan {
-        private int maThanhToan; // Thay long thành int
+        private int maThanhToan;
         private String hoTen;
         private String email;
         private String soDienThoai;
@@ -800,7 +835,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         private String phuongThucThanhToan;
         private double soTienDaThanhToan;
         private String trangThaiThanhToan;
-        private int bookingId; // Thay long thành int
+        private int bookingId;
 
         public ThanhToan(int maThanhToan, String hoTen, String email, String soDienThoai, int soLuongBan,
                          String ngayDatTiec, String ghiChu, double tongTien, String phuongThucThanhToan,
@@ -819,7 +854,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             this.bookingId = bookingId;
         }
 
-        public int getMaThanhToan() { return maThanhToan; } // Thay long thành int
+        public int getMaThanhToan() { return maThanhToan; }
         public String getHoTen() { return hoTen; }
         public String getEmail() { return email; }
         public String getSoDienThoai() { return soDienThoai; }
@@ -830,6 +865,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public String getPhuongThucThanhToan() { return phuongThucThanhToan; }
         public double getSoTienDaThanhToan() { return soTienDaThanhToan; }
         public String getTrangThaiThanhToan() { return trangThaiThanhToan; }
-        public int getBookingId() { return bookingId; } // Thay long thành int
+        public int getBookingId() { return bookingId; }
+    }
+
+    public boolean updateUser(String userId, String name, String phone, String email) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME, name);
+        values.put(COLUMN_PHONE, phone);
+        values.put(COLUMN_EMAIL, email);
+
+        int rowsAffected = db.update(TABLE_USERS, values, COLUMN_USER_ID + " = ?", new String[]{userId});
+        db.close();
+        return rowsAffected > 0;
     }
 }

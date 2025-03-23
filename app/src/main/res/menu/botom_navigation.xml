@@ -1,14 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_home"
-        android:icon="@drawable/baseline_home_24"
-        android:title="Home"/>
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_home"
+        android:title="Trang chủ"/>
+
     <item
-        android:id="@+id/nav_notification"
-        android:icon="@drawable/bell_solid"
-        android:title="Thông báo"/>
-    <item
-        android:id="@+id/nav_person"
-        android:icon="@drawable/person_solid"
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/ic_profile"
         android:title="Tài khoản"/>
 </menu>

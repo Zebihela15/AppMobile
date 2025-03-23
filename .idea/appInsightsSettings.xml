@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.sinhvien.nhom11_app_dat_tiec" />
-                  <option name="mobileSdkAppId" value="1:520104481618:android:ec097faad69017ec11608b" />
-                  <option name="projectId" value="appdattiec" />
-                  <option name="projectNumber" value="520104481618" />
+                  <option name="mobileSdkAppId" value="1:555568655850:android:86ca625f313769bfb01693" />
+                  <option name="projectId" value="nhom11-app-tiec" />
+                  <option name="projectNumber" value="555568655850" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

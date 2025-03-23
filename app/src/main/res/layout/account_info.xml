@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    tools:context=".UserInfoActivity">
+    tools:context=".AccountActivity">
 
     <!-- Thanh tiêu đề -->
     <LinearLayout
@@ -79,11 +79,15 @@
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_edit"/>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/etUserName"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Tên người dùng"/>
+                android:hint="Nhập tên người dùng"
+                android:text=""
+                android:textSize="16sp"/>
         </LinearLayout>
 
         <!-- Số điện thoại -->
@@ -99,11 +103,15 @@
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_call"/>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Số điện thoại: "/>
+                android:hint="Nhập số điện thoại"
+                android:text=""
+                android:textSize="16sp"/>
         </LinearLayout>
 
         <!-- Email -->
@@ -119,14 +127,18 @@
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_send"/>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Email"/>
+                android:hint="Nhập email"
+                android:text=""
+                android:textSize="16sp"/>
         </LinearLayout>
 
-        <!-- Giới tính -->
+        <!-- Giới tính (Spinner) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -139,11 +151,25 @@
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_compass"/>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <Spinner
+                android:id="@+id/spGender"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Giới tính: "/>
+                android:entries="@array/gender_options"
+                android:textSize="16sp"/>
         </LinearLayout>
+
+        <!-- Nút Lưu -->
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Lưu"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/pink"
+            android:textStyle="bold"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
