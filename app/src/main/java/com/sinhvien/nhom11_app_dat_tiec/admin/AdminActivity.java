@@ -24,6 +24,9 @@ public class AdminActivity extends AppCompatActivity {
         btnRestaurants.setOnClickListener(v -> {
             startActivity(new Intent(this, RestaurantActivity.class));
         });
+        btnServices.setOnClickListener(v -> {
+            startActivity(new Intent(this, ServiceActivity.class));
+        });
 
 
     }

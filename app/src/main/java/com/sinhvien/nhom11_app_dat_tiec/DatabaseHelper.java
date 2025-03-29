@@ -146,9 +146,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COLUMN_TT_BOOKING_ID + ") REFERENCES " + TABLE_BOOKINGS + "(" + COLUMN_BOOKING_ID + "))";
         db.execSQL(CREATE_THANHTOAN_TABLE);
 
-        insertInitialRestaurants(db);
+        getAllRestaurants();
         insertInitialMenus(db);
-        insertInitialServices(db);
+        getAllServices();
     }
 
     @Override
@@ -170,19 +170,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    private void insertInitialRestaurants(SQLiteDatabase db) {
-        insertRestaurant(db, "Diamond Place 1", "Không gian thoáng đãng, dịch vụ chu đáo.", R.drawable.dtc1);
-        insertRestaurant(db, "Tràng An Palace", "Phong cách sang trọng, chuyên nghiệp.", R.drawable.dtc2);
-        insertRestaurant(db, "New Orient Hotel", "Địa điểm lý tưởng để tổ chức tiệc cưới.", R.drawable.dtc3);
-    }
 
-    private void insertRestaurant(SQLiteDatabase db, String title, String description, int image) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_RESTAURANT_TITLE, title);
-        values.put(COLUMN_DESCRIPTION, description);
-        values.put(COLUMN_IMAGE, image);
-        db.insert(TABLE_RESTAURANTS, null, values);
-    }
 
     private void insertInitialMenus(SQLiteDatabase db) {
         insertMenu(db, "Menu normal", 3550000);
@@ -195,20 +183,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_MENU_PRICE, price);
         db.insert(TABLE_MENUS, null, values);
     }
-
-    private void insertInitialServices(SQLiteDatabase db) {
-        insertService(db, "Trang trí bánh kem", 100000);
-        insertService(db, "Trang trí tiệc cưới", 150000);
-        insertService(db, "Dịch vụ 3", 200000);
-    }
-
-    private void insertService(SQLiteDatabase db, String title, double price) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_SERVICE_TITLE, title);
-        values.put(COLUMN_SERVICE_PRICE, price);
-        db.insert(TABLE_SERVICES, null, values);
-    }
-
     public boolean addUser(String userId, String name, String phone, String email) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -387,24 +361,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return menuList;
     }
-
-    public List<Service> getAllServices() {
-        List<Service> serviceList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SERVICES, null);
-        if (cursor.moveToFirst()) {
-            do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_TITLE));
-                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_PRICE));
-                serviceList.add(new Service(id, title, price));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        db.close();
-        return serviceList;
-    }
-
     public List<Order> getOrderHistory(String userId) {
         List<Order> orderList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -675,21 +631,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public double getPrice() { return price; }
     }
 
-    public static class Service {
-        private int id;
-        private String title;
-        private double price;
 
-        public Service(int id, String title, double price) {
-            this.id = id;
-            this.title = title;
-            this.price = price;
-        }
-
-        public int getId() { return id; }
-        public String getTitle() { return title; }
-        public double getPrice() { return price; }
-    }
 
 
     public static class User {
@@ -889,6 +831,53 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_RESTAURANTS, COLUMN_RESTAURANT_ID + " = ?",
                 new String[]{String.valueOf(restaurantId)});
+        db.close();
+    }
+    public long addService(Service service) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_SERVICE_TITLE, service.getTitle());
+        values.put(COLUMN_SERVICE_PRICE, service.getPrice());
+        long id = db.insert(TABLE_SERVICES, null, values);
+        db.close();
+        return id;
+    }
+
+    public List<Service> getAllServices() {
+        List<Service> services = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_SERVICES,
+                new String[]{COLUMN_SERVICE_ID, COLUMN_SERVICE_TITLE, COLUMN_SERVICE_PRICE},
+                null, null, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Service service = new Service();
+                service.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_ID)));
+                service.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_TITLE)));
+                service.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_PRICE)));
+                services.add(service);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return services;
+    }
+
+    public int updateService(Service service) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_SERVICE_TITLE, service.getTitle());
+        values.put(COLUMN_SERVICE_PRICE, service.getPrice());
+        return db.update(TABLE_SERVICES, values,
+                COLUMN_SERVICE_ID + " = ?",
+                new String[]{String.valueOf(service.getId())});
+    }
+
+    public void deleteService(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_SERVICES, COLUMN_SERVICE_ID + " = ?",
+                new String[]{String.valueOf(id)});
         db.close();
     }
 
