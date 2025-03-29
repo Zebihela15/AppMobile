@@ -16,9 +16,9 @@ import java.util.List;
 public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRestaurantAdapter.ViewHolder> {
 
     private Context context;
-    private List<DatabaseHelper.Restaurant> restaurantList;
+    private List<Restaurant> restaurantList;
 
-    public FeaturedRestaurantAdapter(Context context, List<DatabaseHelper.Restaurant> restaurantList) {
+    public FeaturedRestaurantAdapter(Context context, List<Restaurant> restaurantList) {
         this.context = context;
         this.restaurantList = restaurantList;
     }
@@ -32,7 +32,7 @@ public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRest
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        DatabaseHelper.Restaurant restaurant = restaurantList.get(position);
+        Restaurant restaurant = restaurantList.get(position);
 
         holder.featuredTitle.setText(restaurant.getTitle());
         holder.featuredDescription.setText(restaurant.getDescription());
@@ -65,7 +65,7 @@ public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRest
     }
 
     // Cập nhật danh sách nhà hàng khi tìm kiếm
-    public void updateList(List<DatabaseHelper.Restaurant> newList) {
+    public void updateList(List<Restaurant> newList) {
         restaurantList = newList;
         notifyDataSetChanged();
     }

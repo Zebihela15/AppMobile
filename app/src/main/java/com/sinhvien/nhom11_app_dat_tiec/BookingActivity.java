@@ -78,9 +78,9 @@ public class BookingActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        List<DatabaseHelper.Restaurant> restaurants = dbHelper.getAllRestaurants();
+        List<Restaurant> restaurants = dbHelper.getAllRestaurants();
         List<String> restaurantNames = new ArrayList<>();
-        for (DatabaseHelper.Restaurant restaurant : restaurants) {
+        for (Restaurant restaurant : restaurants) {
             restaurantNames.add(restaurant.getTitle());
         }
 

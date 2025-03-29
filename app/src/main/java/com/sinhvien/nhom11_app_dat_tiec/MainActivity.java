@@ -17,7 +17,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-import com.sinhvien.nhom11_app_dat_tiec.DatabaseHelper.Restaurant;
+import com.sinhvien.nhom11_app_dat_tiec.Restaurant;
 
 import java.util.ArrayList;
 import java.util.List;

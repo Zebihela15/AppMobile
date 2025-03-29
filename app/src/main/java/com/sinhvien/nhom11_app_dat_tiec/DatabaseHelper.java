@@ -405,24 +405,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return serviceList;
     }
 
-    public List<Restaurant> getAllRestaurants() {
-        List<Restaurant> restaurantList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_RESTAURANTS, null);
-        if (cursor.moveToFirst()) {
-            do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-                int image = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
-                restaurantList.add(new Restaurant(id, title, description, image));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        db.close();
-        return restaurantList;
-    }
-
     public List<Order> getOrderHistory(String userId) {
         List<Order> orderList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -709,24 +691,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public double getPrice() { return price; }
     }
 
-    public static class Restaurant {
-        private int id;
-        private String title;
-        private String description;
-        private int image;
-
-        public Restaurant(int id, String title, String description, int image) {
-            this.id = id;
-            this.title = title;
-            this.description = description;
-            this.image = image;
-        }
-
-        public int getId() { return id; }
-        public String getTitle() { return title; }
-        public String getDescription() { return description; }
-        public int getImage() { return image; }
-    }
 
     public static class User {
         private int id;
@@ -879,4 +843,54 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return rowsAffected > 0;
     }
+    public void addRestaurant(Restaurant restaurant) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
+        values.put(COLUMN_DESCRIPTION, restaurant.getDescription());
+        values.put(COLUMN_IMAGE, restaurant.getImageResource());
+        db.insert(TABLE_RESTAURANTS, null, values);
+        db.close();
+    }
+
+    public List<Restaurant> getAllRestaurants() {
+        List<Restaurant> restaurantList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_RESTAURANTS;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Restaurant restaurant = new Restaurant();
+                restaurant.setRestaurantId(cursor.getInt(0));
+                restaurant.setTitle(cursor.getString(1));
+                restaurant.setDescription(cursor.getString(2));
+                restaurant.setImageResource(cursor.getInt(3));
+                restaurantList.add(restaurant);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return restaurantList;
+    }
+
+    public void updateRestaurant(Restaurant restaurant) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
+        values.put(COLUMN_DESCRIPTION, restaurant.getDescription());
+        values.put(COLUMN_IMAGE, restaurant.getImageResource());
+        db.update(TABLE_RESTAURANTS, values, COLUMN_RESTAURANT_ID + " = ?",
+                new String[]{String.valueOf(restaurant.getRestaurantId())});
+        db.close();
+    }
+
+    public void deleteRestaurant(int restaurantId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_RESTAURANTS, COLUMN_RESTAURANT_ID + " = ?",
+                new String[]{String.valueOf(restaurantId)});
+        db.close();
+    }
+
+
 }
