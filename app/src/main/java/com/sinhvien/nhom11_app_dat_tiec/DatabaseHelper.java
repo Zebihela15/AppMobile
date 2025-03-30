@@ -17,7 +17,7 @@ import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Userdatabase.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     // Bảng users
     private static final String TABLE_USERS = "users";
@@ -31,7 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_RESTAURANTS = "restaurants";
     private static final String COLUMN_RESTAURANT_ID = "id";
     private static final String COLUMN_RESTAURANT_TITLE = "title";
-    private static final String COLUMN_DESCRIPTION = "description";
+    private static final String COLUMN_RESTAURANT_DESCRIPTION = "restaurant_description";
     private static final String COLUMN_IMAGE = "image";
 
     // Bảng menus
@@ -39,6 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_MENU_ID = "id";
     private static final String COLUMN_MENU_TITLE = "title";
     private static final String COLUMN_MENU_PRICE = "price";
+    private static final String COLUMN_MENU_DESCRIPTION="menu_description";
 
     // Bảng services
     private static final String TABLE_SERVICES = "services";
@@ -94,14 +95,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String CREATE_RESTAURANTS_TABLE = "CREATE TABLE " + TABLE_RESTAURANTS + " (" +
                 COLUMN_RESTAURANT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_RESTAURANT_TITLE + " TEXT, " +
-                COLUMN_DESCRIPTION + " TEXT, " +
-                COLUMN_IMAGE + " INTEGER)";
+                COLUMN_RESTAURANT_DESCRIPTION + " TEXT, " +
+                COLUMN_IMAGE + " TEXT)";
         db.execSQL(CREATE_RESTAURANTS_TABLE);
 
         String CREATE_MENUS_TABLE = "CREATE TABLE " + TABLE_MENUS + " (" +
                 COLUMN_MENU_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_MENU_TITLE + " TEXT, " +
-                COLUMN_MENU_PRICE + " REAL)";
+                COLUMN_MENU_PRICE + " REAL, "+
+                COLUMN_MENU_DESCRIPTION+" TEXT)";
         db.execSQL(CREATE_MENUS_TABLE);
 
         String CREATE_SERVICES_TABLE = "CREATE TABLE " + TABLE_SERVICES + " (" +
@@ -145,10 +147,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_TT_BOOKING_ID + " INTEGER, " +
                 "FOREIGN KEY(" + COLUMN_TT_BOOKING_ID + ") REFERENCES " + TABLE_BOOKINGS + "(" + COLUMN_BOOKING_ID + "))";
         db.execSQL(CREATE_THANHTOAN_TABLE);
-
-        getAllRestaurants();
-        insertInitialMenus(db);
-        getAllServices();
     }
 
     @Override
@@ -168,20 +166,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
-    }
-
-
-
-    private void insertInitialMenus(SQLiteDatabase db) {
-        insertMenu(db, "Menu normal", 3550000);
-        insertMenu(db, "Menu Premium", 5000000);
-    }
-
-    private void insertMenu(SQLiteDatabase db, String title, double price) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_MENU_TITLE, title);
-        values.put(COLUMN_MENU_PRICE, price);
-        db.insert(TABLE_MENUS, null, values);
     }
     public boolean addUser(String userId, String name, String phone, String email) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -335,31 +319,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_ID));
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-                int image = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_DESCRIPTION));
+                String image = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE));
                 restaurantList.add(new Restaurant(id, title, description, image));
             } while (cursor.moveToNext());
         }
         cursor.close();
         db.close();
         return restaurantList;
-    }
-
-    public List<Menu> getAllMenus() {
-        List<Menu> menuList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_MENUS, null);
-        if (cursor.moveToFirst()) {
-            do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_TITLE));
-                double price = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_MENU_PRICE));
-                menuList.add(new Menu(id, title, price));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        db.close();
-        return menuList;
     }
     public List<Order> getOrderHistory(String userId) {
         List<Order> orderList = new ArrayList<>();
@@ -614,26 +581,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return thanhToan;
     }
-
-    public static class Menu {
-        private int id;
-        private String title;
-        private double price;
-
-        public Menu(int id, String title, double price) {
-            this.id = id;
-            this.title = title;
-            this.price = price;
-        }
-
-        public int getId() { return id; }
-        public String getTitle() { return title; }
-        public double getPrice() { return price; }
-    }
-
-
-
-
     public static class User {
         private int id;
         private String userId;
@@ -789,8 +736,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
-        values.put(COLUMN_DESCRIPTION, restaurant.getDescription());
-        values.put(COLUMN_IMAGE, restaurant.getImageResource());
+        values.put(COLUMN_RESTAURANT_DESCRIPTION, restaurant.getDescription());
+        values.put(COLUMN_IMAGE, restaurant.getImagePath());
         db.insert(TABLE_RESTAURANTS, null, values);
         db.close();
     }
@@ -807,7 +754,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 restaurant.setRestaurantId(cursor.getInt(0));
                 restaurant.setTitle(cursor.getString(1));
                 restaurant.setDescription(cursor.getString(2));
-                restaurant.setImageResource(cursor.getInt(3));
+                restaurant.setImagePath(cursor.getString(3));
                 restaurantList.add(restaurant);
             } while (cursor.moveToNext());
         }
@@ -820,8 +767,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
-        values.put(COLUMN_DESCRIPTION, restaurant.getDescription());
-        values.put(COLUMN_IMAGE, restaurant.getImageResource());
+        values.put(COLUMN_RESTAURANT_DESCRIPTION, restaurant.getDescription());
+        values.put(COLUMN_IMAGE, restaurant.getImagePath());
         db.update(TABLE_RESTAURANTS, values, COLUMN_RESTAURANT_ID + " = ?",
                 new String[]{String.valueOf(restaurant.getRestaurantId())});
         db.close();
@@ -877,6 +824,53 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void deleteService(long id) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_SERVICES, COLUMN_SERVICE_ID + " = ?",
+                new String[]{String.valueOf(id)});
+        db.close();
+    }
+    public long addMenu(MenuItem menuItem) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_MENU_TITLE, menuItem.getTitle());
+        values.put(COLUMN_MENU_PRICE, menuItem.getPrice());
+        values.put(COLUMN_MENU_DESCRIPTION, menuItem.getDescription());
+        long id = db.insert(TABLE_MENUS, null, values);
+        db.close();
+        return id;
+    }
+
+    public List<MenuItem> getAllMenus() {
+        List<MenuItem> menuItems = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_MENUS;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                MenuItem item = new MenuItem();
+                item.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_ID)));
+                item.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_TITLE)));
+                item.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_MENU_PRICE)));
+                item.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_DESCRIPTION))); // Thêm dòng này
+                menuItems.add(item);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return menuItems;
+    }
+
+    public int updateMenu(MenuItem menuItem) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_MENU_TITLE, menuItem.getTitle());
+        values.put(COLUMN_MENU_PRICE, menuItem.getPrice());
+        values.put(COLUMN_MENU_DESCRIPTION, menuItem.getDescription());
+        return db.update(TABLE_MENUS, values, COLUMN_MENU_ID + " = ?",
+                new String[]{String.valueOf(menuItem.getId())});
+    }
+    public void deleteMenu(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MENUS, COLUMN_MENU_ID + " = ?",
                 new String[]{String.valueOf(id)});
         db.close();
     }

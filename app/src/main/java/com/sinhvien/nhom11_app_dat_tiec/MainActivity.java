@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         // Khởi tạo DatabaseHelper
         databaseHelper = new DatabaseHelper(this);
 
-        // Xử lý RecyclerView hiển thị nhà hàng nổi bật
         featuredRecyclerView = findViewById(R.id.featuredRecyclerView);
         featuredRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
@@ -71,9 +70,9 @@ public class MainActivity extends AppCompatActivity {
             int totalItems = imageAdapter.getItemCount();
             int nextItem = (currentItem + 1) % totalItems;
             viewPager.setCurrentItem(nextItem, true);
-            autoScrollHandler.postDelayed(autoScrollRunnable, 3000); // 3 giây
+            autoScrollHandler.postDelayed(autoScrollRunnable, 5000);
         };
-        autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
+        autoScrollHandler.postDelayed(autoScrollRunnable, 5000);
 
         // Xử lý ViewPager hiển thị hình ảnh món ăn
         featuredDishViewPager = findViewById(R.id.featuredDishViewPager);
@@ -91,9 +90,9 @@ public class MainActivity extends AppCompatActivity {
             int totalItems = dishAdapter.getItemCount();
             int nextItem = (currentItem + 1) % totalItems;
             featuredDishViewPager.setCurrentItem(nextItem, true);
-            dishHandler.postDelayed(dishRunnable, 6000); // 6 giây
+            dishHandler.postDelayed(dishRunnable, 10000);
         };
-        dishHandler.postDelayed(dishRunnable, 6000);
+        dishHandler.postDelayed(dishRunnable, 10000);
 
         // Xử lý BottomNavigationView
         bottomNavigationView = findViewById(R.id.navigation);
@@ -140,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // Dừng tự động chạy khi Activity tạm dừng
         autoScrollHandler.removeCallbacks(autoScrollRunnable);
         dishHandler.removeCallbacks(dishRunnable);
     }
@@ -148,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Tiếp tục tự động chạy khi Activity được resume
         autoScrollHandler.postDelayed(autoScrollRunnable, 3000);
         dishHandler.postDelayed(dishRunnable, 6000);
     }
@@ -156,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Dừng tự động chạy khi Activity bị hủy
         autoScrollHandler.removeCallbacks(autoScrollRunnable);
         dishHandler.removeCallbacks(dishRunnable);
     }

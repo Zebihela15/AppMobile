@@ -17,7 +17,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     private List<Integer> imageList;
     private boolean isViewPager;
 
-    // Constructor nhận List<Integer>
+
     public ImageAdapter(Context context, List<Integer> imageList,boolean isViewPager) {
         this.context = context;
         this.imageList = imageList;
