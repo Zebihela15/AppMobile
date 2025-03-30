@@ -3,14 +3,12 @@ package com.sinhvien.nhom11_app_dat_tiec.admin;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-import android.view.View;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 
@@ -23,7 +21,7 @@ public class AddRestaurantFragment extends Fragment {
     private ImageView ivImage;
     private Button btnSave;
     private DatabaseHelper dbHelper;
-    private int selectedImageResource = R.drawable.d11;
+    private String selectedImagePath = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,16 +41,20 @@ public class AddRestaurantFragment extends Fragment {
     }
 
     private void showImageSelectionDialog() {
-        // Implement image selection logic
-        // For simplicity, we'll just use a hardcoded list
-        String[] images = {"Nhà hàng 1", "Nhà hàng 2", "Nhà hàng 3"};
-        int[] imageResources = {R.drawable.d11, R.drawable.d21, R.drawable.d31};
+        // Danh sách tên và đường dẫn ảnh
+        String[] imageNames = {"Nhà hàng 1", "Nhà hàng 2", "Nhà hàng 3"};
+        String[] imagePaths = {
+                "path_to_image_1.jpg",
+                "path_to_image_2.jpg",
+                "path_to_image_3.jpg"
+        };
+        int[] imagePreviews = {R.drawable.d11, R.drawable.d21, R.drawable.d31}; // Ảnh xem trước
 
         new AlertDialog.Builder(getContext())
                 .setTitle("Chọn hình ảnh")
-                .setItems(images, (dialog, which) -> {
-                    selectedImageResource = imageResources[which];
-                    ivImage.setImageResource(selectedImageResource);
+                .setItems(imageNames, (dialog, which) -> {
+                    selectedImagePath = imagePaths[which]; // Lưu đường dẫn
+                    ivImage.setImageResource(imagePreviews[which]); // Hiển thị ảnh xem trước
                 })
                 .show();
     }
@@ -66,13 +68,22 @@ public class AddRestaurantFragment extends Fragment {
             return;
         }
 
+        if (selectedImagePath.isEmpty()) {
+            Toast.makeText(getContext(), "Vui lòng chọn ảnh nhà hàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Restaurant restaurant = new Restaurant();
         restaurant.setTitle(title);
         restaurant.setDescription(description);
-        restaurant.setImageResource(selectedImageResource);
+        restaurant.setImageResource(selectedImagePath);
 
-        dbHelper.addRestaurant(restaurant);
-        Toast.makeText(getContext(), "Đã thêm nhà hàng", Toast.LENGTH_SHORT).show();
-        getActivity().getSupportFragmentManager().popBackStack();
+        long result = dbHelper.addRestaurant(restaurant);
+        if (result != -1) {
+            Toast.makeText(getContext(), "Thêm nhà hàng thành công", Toast.LENGTH_SHORT).show();
+            getActivity().getSupportFragmentManager().popBackStack();
+        } else {
+            Toast.makeText(getContext(), "Thêm nhà hàng thất bại", Toast.LENGTH_SHORT).show();
+        }
     }
 }

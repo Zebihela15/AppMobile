@@ -732,16 +732,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return rowsAffected > 0;
     }
-    public void addRestaurant(Restaurant restaurant) {
+    // Thêm các hằng số cho tên cột
+    private static final String COLUMN_IMAGE_RESOURCE = "image_resource";
+
+    // Phương thức thêm nhà hàng
+    public long addRestaurant(Restaurant restaurant) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
         values.put(COLUMN_RESTAURANT_DESCRIPTION, restaurant.getDescription());
-        values.put(COLUMN_IMAGE, restaurant.getImagePath());
-        db.insert(TABLE_RESTAURANTS, null, values);
+        values.put(COLUMN_IMAGE, restaurant.getImageResource()); // Sửa thành COLUMN_IMAGE
+
+        long result = db.insert(TABLE_RESTAURANTS, null, values);
         db.close();
+        return result;
     }
 
+    // Phương thức lấy tất cả nhà hàng
     public List<Restaurant> getAllRestaurants() {
         List<Restaurant> restaurantList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_RESTAURANTS;
@@ -754,7 +762,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 restaurant.setRestaurantId(cursor.getInt(0));
                 restaurant.setTitle(cursor.getString(1));
                 restaurant.setDescription(cursor.getString(2));
-                restaurant.setImagePath(cursor.getString(3));
+                restaurant.setImageResource(cursor.getString(3));
                 restaurantList.add(restaurant);
             } while (cursor.moveToNext());
         }
@@ -763,22 +771,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return restaurantList;
     }
 
-    public void updateRestaurant(Restaurant restaurant) {
+    // Phương thức cập nhật nhà hàng
+    public int updateRestaurant(Restaurant restaurant) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
         values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
         values.put(COLUMN_RESTAURANT_DESCRIPTION, restaurant.getDescription());
-        values.put(COLUMN_IMAGE, restaurant.getImagePath());
-        db.update(TABLE_RESTAURANTS, values, COLUMN_RESTAURANT_ID + " = ?",
+        values.put(COLUMN_IMAGE, restaurant.getImageResource()); // Sửa thành COLUMN_IMAGE
+
+        int rowsAffected = db.update(TABLE_RESTAURANTS, values,
+                COLUMN_RESTAURANT_ID + " = ?",
                 new String[]{String.valueOf(restaurant.getRestaurantId())});
         db.close();
+        return rowsAffected;
     }
-
-    public void deleteRestaurant(int restaurantId) {
+    // Phương thức xóa nhà hàng (giữ nguyên)
+    public int deleteRestaurant(int restaurantId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_RESTAURANTS, COLUMN_RESTAURANT_ID + " = ?",
+        int rowsDeleted = db.delete(TABLE_RESTAURANTS,
+                COLUMN_RESTAURANT_ID + " = ?",
                 new String[]{String.valueOf(restaurantId)});
         db.close();
+        return rowsDeleted;
     }
     public long addService(Service service) {
         SQLiteDatabase db = this.getWritableDatabase();

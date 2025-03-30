@@ -6,16 +6,16 @@ public class Restaurant implements Serializable {
     private int restaurantId;
     private String title;
     private String description;
-    private String imagePath;
+    private String imageResource;
 
     // Constructor
     public Restaurant() {}
 
-    public Restaurant(int restaurantId, String title, String description, String imagePath) {
+    public Restaurant(int restaurantId, String title, String description, String imageResource) {
         this.restaurantId = restaurantId;
         this.title = title;
         this.description = description;
-        this.imagePath = imagePath;
+        this.imageResource = imageResource;
     }
 
     // Getter và Setter
@@ -43,11 +43,11 @@ public class Restaurant implements Serializable {
         this.description = description;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageResource() {
+        return imageResource;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageResource(String imageResource) {
+        this.imageResource = imageResource;
     }
 }

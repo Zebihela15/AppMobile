@@ -41,8 +41,8 @@ public class FeaturedRestaurantAdapter extends RecyclerView.Adapter<FeaturedRest
         holder.featuredDescription.setText(restaurant.getDescription());
 
         // Hiển thị hình ảnh từ database
-        if (restaurant.getImagePath() != null && !restaurant.getImagePath().isEmpty()) {
-            String imageName = restaurant.getImagePath();
+        if (restaurant.getImageResource() != null && !restaurant.getImageResource().isEmpty()) {
+            String imageName = restaurant.getImageResource();
 
             // Loại bỏ đuôi file nếu có
             if (imageName.contains(".")) {

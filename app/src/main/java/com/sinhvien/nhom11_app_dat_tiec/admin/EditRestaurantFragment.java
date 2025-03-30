@@ -26,12 +26,12 @@ public class EditRestaurantFragment extends Fragment {
     private Button btnSaveChanges, btnDelete, btnChangeImage;
     private DatabaseHelper dbHelper;
     private Restaurant restaurant;
-    private int selectedImageResource;
+    private String selectedImageName; // Thay đổi từ int sang String
 
     public static EditRestaurantFragment newInstance(Restaurant restaurant) {
         EditRestaurantFragment fragment = new EditRestaurantFragment();
         Bundle args = new Bundle();
-        args.putSerializable(ARG_RESTAURANT,  restaurant);
+        args.putSerializable(ARG_RESTAURANT, restaurant);
         fragment.setArguments(args);
         return fragment;
     }
@@ -44,7 +44,7 @@ public class EditRestaurantFragment extends Fragment {
         dbHelper = new DatabaseHelper(requireContext());
         if (getArguments() != null) {
             restaurant = (Restaurant) getArguments().getSerializable(ARG_RESTAURANT);
-            selectedImageResource = restaurant.getImageResource();
+            selectedImageName = restaurant.getImageResource();
         }
 
         // Ánh xạ view
@@ -57,7 +57,8 @@ public class EditRestaurantFragment extends Fragment {
 
         // Điền dữ liệu hiện tại
         if (restaurant != null) {
-            ivRestaurantImage.setImageResource(restaurant.getImageResource());
+            int resId = getResources().getIdentifier(restaurant.getImageResource(), "drawable", requireContext().getPackageName());
+            ivRestaurantImage.setImageResource(resId);
             etRestaurantName.setText(restaurant.getTitle());
             etDescription.setText(restaurant.getDescription());
         }
@@ -71,16 +72,15 @@ public class EditRestaurantFragment extends Fragment {
     }
 
     private void showImageSelectionDialog() {
-        // Triển khai chọn ảnh từ gallery hoặc chụp ảnh mới
-        // Ví dụ đơn giản:
-        String[] images = {"Ảnh 1", "Ảnh 2", "Ảnh 3"};
-        int[] imageRes = {R.drawable.d11, R.drawable.d12, R.drawable.d13};
+        String[] imageNames = {"d11", "d12", "d13"};
+        String[] displayNames = {"Ảnh 1", "Ảnh 2", "Ảnh 3"};
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Chọn ảnh nhà hàng")
-                .setItems(images, (dialog, which) -> {
-                    selectedImageResource = imageRes[which];
-                    ivRestaurantImage.setImageResource(selectedImageResource);
+                .setItems(displayNames, (dialog, which) -> {
+                    selectedImageName = imageNames[which];
+                    int resId = getResources().getIdentifier(selectedImageName, "drawable", requireContext().getPackageName());
+                    ivRestaurantImage.setImageResource(resId);
                 })
                 .show();
     }
@@ -97,7 +97,7 @@ public class EditRestaurantFragment extends Fragment {
         if (restaurant != null) {
             restaurant.setTitle(title);
             restaurant.setDescription(description);
-            restaurant.setImageResource(selectedImageResource);
+            restaurant.setImageResource(selectedImageName);
 
             dbHelper.updateRestaurant(restaurant);
             Toast.makeText(getContext(), "Cập nhật nhà hàng thành công", Toast.LENGTH_SHORT).show();
