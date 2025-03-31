@@ -20,4 +20,15 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
+    <style name="ButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/rounded_button</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="OutlineButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:textColor">@color/primary_color</item>
+        <item name="android:background">@drawable/rounded_button_outline</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
 </resources>

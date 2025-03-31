@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -25,16 +26,17 @@ import java.util.List;
 public class BookingActivity extends AppCompatActivity {
     private Spinner spinnerRestaurant, spinnerTime;
     private EditText etTableCount, etFullName, etPhone, etEmail;
-    private CheckBox cbService1, cbService2, cbService3;
+    private LinearLayout servicesContainer;
     private RadioGroup rgMenu;
-    private RadioButton rbMenu1, rbMenu2;
     private TextView tvTotalPrice;
     private Button btnBook, btnSelectDate, btnIncrease, btnDecrease;
-    private int tableCount = 5; // Giá trị mặc định
+    private int tableCount = 5;
     private double menuPrice = 0;
     private double serviceCost = 0;
     private String selectedDate = "";
     private DatabaseHelper dbHelper;
+    private List<MenuItem> menuItems;
+    private List<Service> services;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,8 @@ public class BookingActivity extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
         initViews();
         setupSpinners();
+        loadServicesFromDatabase();
+        loadMenusFromDatabase();
         setupListeners();
         updateTotalPrice();
 
@@ -58,12 +62,8 @@ public class BookingActivity extends AppCompatActivity {
         etFullName = findViewById(R.id.etFullName);
         etPhone = findViewById(R.id.etPhone);
         etEmail = findViewById(R.id.etEmail);
-        cbService1 = findViewById(R.id.cbService1);
-        cbService2 = findViewById(R.id.cbService2);
-        cbService3 = findViewById(R.id.cbService3);
+        servicesContainer = findViewById(R.id.servicesContainer);
         rgMenu = findViewById(R.id.rgMenu);
-        rbMenu1 = findViewById(R.id.rbMenu1);
-        rbMenu2 = findViewById(R.id.rbMenu2);
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
         btnBook = findViewById(R.id.btnBook);
         btnSelectDate = findViewById(R.id.btnSelectDate);
@@ -71,31 +71,76 @@ public class BookingActivity extends AppCompatActivity {
         btnDecrease = findViewById(R.id.btnDecrease);
 
         etTableCount.setText(String.valueOf(tableCount));
-
-        if (rgMenu == null) {
-            Toast.makeText(this, "Lỗi: RadioGroup không được tìm thấy!", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void setupSpinners() {
+        // Spinner nhà hàng
         List<Restaurant> restaurants = dbHelper.getAllRestaurants();
         List<String> restaurantNames = new ArrayList<>();
         for (Restaurant restaurant : restaurants) {
             restaurantNames.add(restaurant.getTitle());
         }
 
-        ArrayAdapter<String> restaurantAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, restaurantNames);
+        ArrayAdapter<String> restaurantAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, restaurantNames);
         restaurantAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerRestaurant.setAdapter(restaurantAdapter);
 
+        // Spinner giờ
         List<String> times = new ArrayList<>();
         for (int i = 15; i <= 20; i++) {
             times.add(i + ":00");
         }
-        ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, times);
+        ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, times);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTime.setAdapter(timeAdapter);
     }
+
+    private void loadServicesFromDatabase() {
+        services = dbHelper.getAllServices();
+        servicesContainer.removeAllViews();
+
+        for (Service service : services) {
+            LinearLayout serviceLayout = new LinearLayout(this);
+            serviceLayout.setOrientation(LinearLayout.HORIZONTAL);
+            serviceLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            serviceLayout.setPadding(0, 8, 0, 8);
+
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(service.getTitle() + " - " + formatPrice(service.getPrice()));
+            checkBox.setTag(service);
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> updateTotalPrice());
+
+            serviceLayout.addView(checkBox);
+            servicesContainer.addView(serviceLayout);
+        }
+    }
+
+
+    private void loadMenusFromDatabase() {
+        menuItems = dbHelper.getAllMenus();
+        rgMenu.removeAllViews();
+
+        for (MenuItem menuItem : menuItems) {
+            RadioButton radioButton = new RadioButton(this);
+            String menuText = menuItem.getTitle() + " - " + formatPrice(menuItem.getPrice()) + "\n" + menuItem.getDescription();
+            radioButton.setText(menuText);
+            radioButton.setTag(menuItem);
+            radioButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    menuPrice = menuItem.getPrice();
+                    updateTotalPrice();
+                }
+            });
+            rgMenu.addView(radioButton);
+        }
+
+
+    }
+
 
     private void fillUserInfoFromPrefs() {
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
@@ -109,16 +154,17 @@ public class BookingActivity extends AppCompatActivity {
                 etEmail.setText(user.getEmail());
             }
         }
-        // Không hiển thị thông báo hoặc chuyển sang LoginActivity nếu không tìm thấy thông tin
     }
 
     private void setupListeners() {
+        // Nút tăng số bàn
         btnIncrease.setOnClickListener(v -> {
             tableCount++;
             etTableCount.setText(String.valueOf(tableCount));
             updateTotalPrice();
         });
 
+        // Nút giảm số bàn
         btnDecrease.setOnClickListener(v -> {
             if (tableCount > 1) {
                 tableCount--;
@@ -127,38 +173,26 @@ public class BookingActivity extends AppCompatActivity {
             }
         });
 
+        // Chọn ngày
         btnSelectDate.setOnClickListener(v -> {
             Calendar calendar = Calendar.getInstance();
             Calendar minDate = Calendar.getInstance();
             minDate.add(Calendar.DAY_OF_MONTH, 7);
 
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
-                selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
-                btnSelectDate.setText(selectedDate);
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+            DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                    (view, year, month, dayOfMonth) -> {
+                        selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
+                        btnSelectDate.setText(selectedDate);
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH));
 
             datePickerDialog.getDatePicker().setMinDate(minDate.getTimeInMillis());
             datePickerDialog.show();
         });
 
-        cbService1.setOnCheckedChangeListener((buttonView, isChecked) -> updateTotalPrice());
-        cbService2.setOnCheckedChangeListener((buttonView, isChecked) -> updateTotalPrice());
-        cbService3.setOnCheckedChangeListener((buttonView, isChecked) -> updateTotalPrice());
-
-        rbMenu1.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                menuPrice = 3550000;
-                updateTotalPrice();
-            }
-        });
-
-        rbMenu2.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                menuPrice = 5000000;
-                updateTotalPrice();
-            }
-        });
-
+        // Nút đặt tiệc
         btnBook.setOnClickListener(v -> {
             String name = etFullName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
@@ -166,12 +200,23 @@ public class BookingActivity extends AppCompatActivity {
             int restaurantId = spinnerRestaurant.getSelectedItemPosition() + 1;
             String time = spinnerTime.getSelectedItem().toString();
 
-            // Cập nhật tableCount từ EditText trước khi truyền
             try {
                 tableCount = Integer.parseInt(etTableCount.getText().toString().trim());
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Số bàn không hợp lệ!", Toast.LENGTH_SHORT).show();
                 return;
+            }
+
+            // Kiểm tra đã chọn menu chưa
+            int selectedMenuId = -1;
+            int selectedRadioButtonId = rgMenu.getCheckedRadioButtonId();
+            if (selectedRadioButtonId == -1) {
+                Toast.makeText(this, "Vui lòng chọn menu tiệc!", Toast.LENGTH_SHORT).show();
+                return;
+            } else {
+                RadioButton selectedRadioButton = findViewById(selectedRadioButtonId);
+                MenuItem selectedMenuItem = (MenuItem) selectedRadioButton.getTag();
+                selectedMenuId = selectedMenuItem.getId();
             }
 
             if (name.isEmpty() || phone.isEmpty() || email.isEmpty() || selectedDate.isEmpty()) {
@@ -189,11 +234,27 @@ public class BookingActivity extends AppCompatActivity {
                 return;
             }
 
-            List<Integer> serviceIds = new ArrayList<>();
-            if (cbService1.isChecked()) serviceIds.add(1);
-            if (cbService2.isChecked()) serviceIds.add(2);
-            if (cbService3.isChecked()) serviceIds.add(3);
+            // Kiểm tra xem ngày giờ đã có người đặt chưa
+            if (dbHelper.isTimeSlotBooked(selectedDate, time, restaurantId)) {
+                Toast.makeText(this, "Thời gian này đã có người đặt. Vui lòng chọn thời gian khác!", Toast.LENGTH_LONG).show();
+                return;
+            }
 
+            // Lấy danh sách dịch vụ đã chọn
+            List<Long> serviceIds = new ArrayList<>();
+            for (int i = 0; i < servicesContainer.getChildCount(); i++) {
+                View child = servicesContainer.getChildAt(i);
+                if (child instanceof LinearLayout) {
+                    LinearLayout serviceLayout = (LinearLayout) child;
+                    CheckBox checkBox = (CheckBox) serviceLayout.getChildAt(0);
+                    if (checkBox.isChecked()) {
+                        Service service = (Service) checkBox.getTag();
+                        serviceIds.add(service.getId());
+                    }
+                }
+            }
+
+            // Lấy user ID từ SharedPreferences
             SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
             String userIdStr = sharedPreferences.getString("user_id", "-1");
             int userId;
@@ -203,18 +264,11 @@ public class BookingActivity extends AppCompatActivity {
                 userId = -1;
             }
 
-            int menuId = -1;
-            if (rgMenu != null) {
-                menuId = rgMenu.getCheckedRadioButtonId() == R.id.rbMenu1 ? 1 : 2;
-            } else {
-                Toast.makeText(this, "Lỗi: Không thể xác định menu!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
+            // Chuyển sang PaymentActivity
             Intent intent = new Intent(BookingActivity.this, PaymentActivity.class);
             intent.putExtra("table_count", tableCount);
-            intent.putExtra("menu_id", menuId);
-            intent.putIntegerArrayListExtra("service_ids", (ArrayList<Integer>) serviceIds);
+            intent.putExtra("menu_id", selectedMenuId);
+            intent.putExtra("service_ids", convertToPrimitiveArray(serviceIds));
             intent.putExtra("date", selectedDate);
             intent.putExtra("time", time);
             intent.putExtra("full_name", name);
@@ -226,20 +280,37 @@ public class BookingActivity extends AppCompatActivity {
         });
     }
 
-    private void updateTotalPrice() {
-        serviceCost = 0;
-        if (cbService1.isChecked()) serviceCost += 100000;
-        if (cbService2.isChecked()) serviceCost += 150000;
-        if (cbService3.isChecked()) serviceCost += 200000;
-
-        double total = (tableCount * menuPrice) + serviceCost;
-        DecimalFormat formatter = new DecimalFormat("#,###");
-        String formattedTotal = formatter.format(total) + " VNĐ";
-        tvTotalPrice.setText("Tổng cộng: " + formattedTotal);
+        private long[] convertToPrimitiveArray(List<Long> longList) {
+        long[] array = new long[longList.size()];
+        for (int i = 0; i < longList.size(); i++) {
+            array[i] = longList.get(i);
+        }
+        return array;
     }
 
-    private void showBookingSuccessMessage(double total) {
-        String message = String.format("Đặt tiệc thành công! Tổng tiền: %.2f VNĐ", total);
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    private void updateTotalPrice() {
+        serviceCost = 0;
+
+        // Tính tổng chi phí dịch vụ
+        for (int i = 0; i < servicesContainer.getChildCount(); i++) {
+            View child = servicesContainer.getChildAt(i);
+            if (child instanceof LinearLayout) {
+                LinearLayout serviceLayout = (LinearLayout) child;
+                CheckBox checkBox = (CheckBox) serviceLayout.getChildAt(0);
+                if (checkBox.isChecked()) {
+                    Service service = (Service) checkBox.getTag();
+                    serviceCost += service.getPrice();
+                }
+            }
+        }
+
+        // Tính tổng chi phí
+        double total = (tableCount * menuPrice) + serviceCost;
+        tvTotalPrice.setText("Tổng cộng: " + formatPrice(total));
+    }
+
+    private String formatPrice(double price) {
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        return formatter.format(price) + " VNĐ";
     }
 }

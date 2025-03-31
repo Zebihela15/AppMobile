@@ -733,7 +733,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rowsAffected > 0;
     }
     // Thêm các hằng số cho tên cột
-    private static final String COLUMN_IMAGE_RESOURCE = "image_resource";
+
 
     // Phương thức thêm nhà hàng
     public long addRestaurant(Restaurant restaurant) {
@@ -742,7 +742,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
         values.put(COLUMN_RESTAURANT_DESCRIPTION, restaurant.getDescription());
-        values.put(COLUMN_IMAGE, restaurant.getImageResource()); // Sửa thành COLUMN_IMAGE
+        values.put(COLUMN_IMAGE, restaurant.getImageResource());
 
         long result = db.insert(TABLE_RESTAURANTS, null, values);
         db.close();
@@ -778,7 +778,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         values.put(COLUMN_RESTAURANT_TITLE, restaurant.getTitle());
         values.put(COLUMN_RESTAURANT_DESCRIPTION, restaurant.getDescription());
-        values.put(COLUMN_IMAGE, restaurant.getImageResource()); // Sửa thành COLUMN_IMAGE
+        values.put(COLUMN_IMAGE, restaurant.getImageResource());
 
         int rowsAffected = db.update(TABLE_RESTAURANTS, values,
                 COLUMN_RESTAURANT_ID + " = ?",
@@ -786,7 +786,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return rowsAffected;
     }
-    // Phương thức xóa nhà hàng (giữ nguyên)
+    // Phương thức xóa nhà hàng
     public int deleteRestaurant(int restaurantId) {
         SQLiteDatabase db = this.getWritableDatabase();
         int rowsDeleted = db.delete(TABLE_RESTAURANTS,
@@ -889,6 +889,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
         db.close();
     }
+    public boolean isTimeSlotBooked(String date, String time, int restaurantId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_BOOKINGS +
+                " WHERE " + COLUMN_BOOKING_DATE + " = ?" +
+                " AND " + COLUMN_BOOKING_TIME + " = ?" +
+                " AND " + COLUMN_BOOKING_RESTAURANT_ID + " = ?";
 
+        Cursor cursor = db.rawQuery(query, new String[]{date, time, String.valueOf(restaurantId)});
+        boolean isBooked = cursor.getCount() > 0;
+        cursor.close();
+        return isBooked;
+    }
 
 }
