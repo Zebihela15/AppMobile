@@ -1,39 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/white"
-    >
+    android:background="@color/white">
+
+    <!-- Header với tiêu đề và search view -->
     <LinearLayout
         android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="16dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/tv_title"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="DANH SÁCH MENU"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:gravity="start|center_vertical"/>
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
 
-        <ImageButton
-            android:id="@+id/btn_search"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_search"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Tìm kiếm"
-            app:tint="@color/black" />
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:queryHint="Tìm kiếm menu..."
+            android:iconifiedByDefault="false"
+            app:queryBackground="@android:color/transparent"
+            app:searchHintIcon="@null"
+            android:layout_marginBottom="8dp">
+
+            <requestFocus />
+        </androidx.appcompat.widget.SearchView>
     </LinearLayout>
 
     <!-- RecyclerView hiển thị danh sách menu -->
@@ -44,10 +46,9 @@
         android:layout_below="@id/header_layout"
         android:clipToPadding="false"
         android:paddingTop="8dp"
-        android:paddingBottom="80dp"
-        android:scrollbars="vertical"/>
+        android:paddingBottom="80dp"/>
 
-    <!-- Floating Action Button để thêm mới -->
+    <!-- Nút thêm mới -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add"
         android:layout_width="wrap_content"
@@ -57,35 +58,5 @@
         android:layout_margin="24dp"
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/colorPrimary"
-        app:tint="@color/white"
-        app:elevation="8dp"
-        app:rippleColor="@color/colorPrimaryDark"/>
-
-    <!-- Empty state khi không có dữ liệu -->
-    <LinearLayout
-        android:id="@+id/empty_state"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:layout_below="@id/header_layout">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Không có menu nào"
-            android:textColor="@color/gray"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp"/>
-
-        <Button
-            android:id="@+id/btn_add_first"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Thêm menu mới"
-            android:layout_marginTop="16dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            app:strokeColor="@color/colorPrimary"
-            app:strokeWidth="1dp"/>
-    </LinearLayout>
+        app:tint="@color/white"/>
 </RelativeLayout>

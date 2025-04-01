@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -238,7 +239,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         Calendar minDate = Calendar.getInstance();
-        minDate.add(Calendar.DAY_OF_MONTH, 14);
+        minDate.add(Calendar.DAY_OF_MONTH, 7);
         try {
             Date selectedDate = sdf.parse(date);
             if (selectedDate.before(minDate.getTime())) return -1;
@@ -644,38 +645,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public String getRestaurantTitle() { return restaurantTitle; }
         public String getMenuTitle() { return menuTitle; }
     }
-
-    public static class Booking {
-        private int id;
-        private String userId;
-        private int restaurantId;
-        private int tableCount;
-        private String date;
-        private String time;
-        private int menuId;
-        private double totalPrice;
-
-        public Booking(int id, String userId, int restaurantId, int tableCount, String date, String time, int menuId, double totalPrice) {
-            this.id = id;
-            this.userId = userId;
-            this.restaurantId = restaurantId;
-            this.tableCount = tableCount;
-            this.date = date;
-            this.time = time;
-            this.menuId = menuId;
-            this.totalPrice = totalPrice;
-        }
-
-        public int getId() { return id; }
-        public String getUserId() { return userId; }
-        public int getRestaurantId() { return restaurantId; }
-        public int getTableCount() { return tableCount; }
-        public String getDate() { return date; }
-        public String getTime() { return time; }
-        public int getMenuId() { return menuId; }
-        public double getTotalPrice() { return totalPrice; }
-    }
-
     public static class ThanhToan {
         private int maThanhToan;
         private String hoTen;
@@ -748,6 +717,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return result;
     }
+    public boolean isRestaurantNameExists(String title) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_RESTAURANTS + " WHERE " + COLUMN_RESTAURANT_TITLE + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{title});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        return exists;
+    }
 
     // Phương thức lấy tất cả nhà hàng
     public List<Restaurant> getAllRestaurants() {
@@ -786,8 +763,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return rowsAffected;
     }
+    public boolean isRestaurantInUse(int restaurantId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_BOOKINGS +
+                " WHERE " + COLUMN_BOOKING_RESTAURANT_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(restaurantId)});
+
+        boolean inUse = false;
+        if (cursor.moveToFirst()) {
+            inUse = cursor.getInt(0) > 0;
+        }
+
+        cursor.close();
+        db.close();
+        return inUse;
+    }
     // Phương thức xóa nhà hàng
     public int deleteRestaurant(int restaurantId) {
+        if (isRestaurantInUse(restaurantId)) {
+            return -1;
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
         int rowsDeleted = db.delete(TABLE_RESTAURANTS,
                 COLUMN_RESTAURANT_ID + " = ?",
@@ -835,12 +831,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_SERVICE_ID + " = ?",
                 new String[]{String.valueOf(service.getId())});
     }
+    public boolean isMenuInUse(int menuId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_BOOKINGS +
+                " WHERE " + COLUMN_BOOKING_MENU_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(menuId)});
 
-    public void deleteService(long id) {
+        boolean inUse = false;
+        if (cursor.moveToFirst()) {
+            inUse = cursor.getInt(0) > 0;
+        }
+
+        cursor.close();
+        db.close();
+        return inUse;
+    }
+
+    public int deleteService(long id) {
+        if (isServiceInUse(id)) {
+            return -1;
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_SERVICES, COLUMN_SERVICE_ID + " = ?",
+        int rowsDeleted = db.delete(TABLE_SERVICES,
+                COLUMN_SERVICE_ID + " = ?",
                 new String[]{String.valueOf(id)});
         db.close();
+        return rowsDeleted;
     }
     public long addMenu(MenuItem menuItem) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -883,11 +900,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.update(TABLE_MENUS, values, COLUMN_MENU_ID + " = ?",
                 new String[]{String.valueOf(menuItem.getId())});
     }
-    public void deleteMenu(int id) {
+    public boolean isServiceInUse(long serviceId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_BOOKING_SERVICES +
+                " WHERE " + COLUMN_BS_SERVICE_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(serviceId)});
+
+        boolean inUse = false;
+        if (cursor.moveToFirst()) {
+            inUse = cursor.getInt(0) > 0;
+        }
+
+        cursor.close();
+        db.close();
+        return inUse;
+    }
+    public int deleteMenu(int id) {
+        if (isMenuInUse(id)) {
+            return -1;
+        }
+
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_MENUS, COLUMN_MENU_ID + " = ?",
+        int rowsDeleted = db.delete(TABLE_MENUS,
+                COLUMN_MENU_ID + " = ?",
                 new String[]{String.valueOf(id)});
         db.close();
+        return rowsDeleted;
     }
     public boolean isTimeSlotBooked(String date, String time, int restaurantId) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -900,6 +938,211 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         boolean isBooked = cursor.getCount() > 0;
         cursor.close();
         return isBooked;
+    }
+    public List<Service> searchServices(String keyword) {
+        List<Service> services = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_SERVICES +
+                " WHERE " + COLUMN_SERVICE_TITLE + " LIKE ?" +
+                " ORDER BY " + COLUMN_SERVICE_TITLE + " COLLATE NOCASE ASC";
+
+        Cursor cursor = db.rawQuery(query, new String[]{"%" + keyword + "%"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Service service = new Service();
+                service.setId(cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_ID)));
+                service.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_TITLE)));
+                service.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_PRICE)));
+                services.add(service);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return services;
+    }
+    public List<MenuItem> searchMenu(String keyword) {
+        List<MenuItem> menus = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_MENUS +
+                " WHERE " + COLUMN_MENU_TITLE + " LIKE ?" +
+                " ORDER BY " + COLUMN_MENU_TITLE + " COLLATE NOCASE ASC";
+
+        Cursor cursor = db.rawQuery(query, new String[]{"%" + keyword + "%"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                MenuItem menu = new MenuItem();
+                menu.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_ID)));
+                menu.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_TITLE)));
+                menu.setPrice(cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_SERVICE_PRICE)));
+                menus.add(menu);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return menus;
+    }
+    public long addBookingAdmin(Booking booking) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_BOOKING_USER_ID, booking.getUserId());
+        values.put(COLUMN_BOOKING_RESTAURANT_ID, booking.getRestaurantId());
+        values.put(COLUMN_BOOKING_TABLE_COUNT, booking.getTableCount());
+        values.put(COLUMN_BOOKING_DATE, booking.getDate());
+        values.put(COLUMN_BOOKING_TIME, booking.getTime());
+        values.put(COLUMN_BOOKING_MENU_ID, booking.getMenuId());
+        values.put(COLUMN_BOOKING_TOTAL_PRICE, booking.getTotalPrice());
+
+        long id = db.insert(TABLE_BOOKINGS, null, values);
+        db.close();
+        return id;
+    }
+    public List<Booking> getAllBookings() {
+        List<Booking> bookings = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_BOOKINGS;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Booking booking = new Booking(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_USER_ID)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_RESTAURANT_ID)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_COUNT)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_MENU_ID)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TOTAL_PRICE))
+                );
+                bookings.add(booking);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return bookings;
+    }
+    public int updateBookingAdmin(Booking booking) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_BOOKING_USER_ID, booking.getUserId());
+        values.put(COLUMN_BOOKING_RESTAURANT_ID, booking.getRestaurantId());
+        values.put(COLUMN_BOOKING_TABLE_COUNT, booking.getTableCount());
+        values.put(COLUMN_BOOKING_DATE, booking.getDate());
+        values.put(COLUMN_BOOKING_TIME, booking.getTime());
+        values.put(COLUMN_BOOKING_MENU_ID, booking.getMenuId());
+        values.put(COLUMN_BOOKING_TOTAL_PRICE, booking.getTotalPrice());
+
+        int rowsAffected = db.update(
+                TABLE_BOOKINGS,
+                values,
+                COLUMN_BOOKING_ID + " = ?",
+                new String[]{String.valueOf(booking.getId())}
+        );
+        db.close();
+        return rowsAffected;
+    }
+    public boolean deleteBooking(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rowsDeleted = db.delete(
+                TABLE_BOOKINGS,
+                COLUMN_BOOKING_ID + " = ?",
+                new String[]{String.valueOf(id)}
+        );
+        db.close();
+        return rowsDeleted > 0;
+    }
+    public List<Booking> searchBookings(String query) {
+        List<Booking> bookings = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        try {
+            // Tìm kiếm theo ID hoặc user ID
+            String sql = "SELECT * FROM " + TABLE_BOOKINGS +
+                    " WHERE " + COLUMN_BOOKING_ID + " LIKE ? OR " +
+                    COLUMN_BOOKING_USER_ID + " LIKE ?";
+
+            String searchQuery = "%" + query + "%";
+            Cursor cursor = db.rawQuery(sql, new String[]{searchQuery, searchQuery});
+
+            if (cursor.moveToFirst()) {
+                do {
+                    Booking booking = new Booking(
+                            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_ID)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_USER_ID)),
+                            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_RESTAURANT_ID)),
+                            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TABLE_COUNT)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_DATE)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TIME)),
+                            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_MENU_ID)),
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_BOOKING_TOTAL_PRICE))
+                    );
+                    bookings.add(booking);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error searching bookings", e);
+        } finally {
+            db.close();
+        }
+        return bookings;
+    }
+    public List<Restaurant> searchRestaurantsAdmin(String keyword) {
+        List<Restaurant> restaurants = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_RESTAURANTS +
+                " WHERE " + COLUMN_RESTAURANT_TITLE + " LIKE ?" +
+                " ORDER BY " + COLUMN_RESTAURANT_TITLE + " COLLATE NOCASE ASC";
+
+        Cursor cursor = db.rawQuery(query, new String[]{"%" + keyword + "%"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Restaurant restaurant = new Restaurant();
+                restaurant.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_TITLE)));
+                restaurant.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RESTAURANT_DESCRIPTION)));
+                restaurant.setImageResource(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE)));
+                restaurants.add(restaurant);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return restaurants;
+    }
+    public boolean isMenuNameExists(String title) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COLUMN_MENU_ID +
+                " FROM " + TABLE_MENUS +
+                " WHERE " + COLUMN_MENU_TITLE + " = ? COLLATE NOCASE";
+
+        Cursor cursor = db.rawQuery(query, new String[]{title.trim()});
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        db.close();
+        return exists;
+    }
+    public boolean isServiceNameExists(String title) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COLUMN_SERVICE_ID +
+                " FROM " + TABLE_SERVICES +
+                " WHERE " + COLUMN_SERVICE_TITLE + " = ? COLLATE NOCASE";
+
+        Cursor cursor = db.rawQuery(query, new String[]{title.trim()});
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        db.close();
+        return exists;
     }
 
 }

@@ -3,31 +3,52 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     android:background="@color/white">
 
-    <!-- Tiêu đề danh sách -->
-    <TextView
-        android:id="@+id/tv_title"
+    <!-- LinearLayout chứa tiêu đề và search view -->
+    <LinearLayout
+        android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="DANH SÁCH NHÀ HÀNG"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- Danh sách nhà hàng -->
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DANH SÁCH NHÀ HÀNG"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:queryHint="Tìm kiếm nhà hàng..."
+            android:iconifiedByDefault="false"
+            app:queryBackground="@android:color/transparent"
+            app:searchHintIcon="@null"
+            android:layout_marginBottom="8dp">
+
+            <requestFocus />
+        </androidx.appcompat.widget.SearchView>
+    </LinearLayout>
+
+    <!-- RecyclerView hiển thị danh sách -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_restaurants"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/tv_title"
+        android:layout_below="@id/header_layout"
         android:clipToPadding="false"
+        android:paddingTop="8dp"
         android:paddingBottom="80dp"/>
 
-
+    <!-- Nút thêm mới -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add"
         android:layout_width="wrap_content"
@@ -38,5 +59,4 @@
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/colorPrimary"
         app:tint="@color/white"/>
-
 </RelativeLayout>

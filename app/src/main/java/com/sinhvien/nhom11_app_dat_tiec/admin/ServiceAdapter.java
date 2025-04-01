@@ -1,21 +1,15 @@
 package com.sinhvien.nhom11_app_dat_tiec.admin;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.sinhvien.nhom11_app_dat_tiec.DatabaseHelper;
 import com.sinhvien.nhom11_app_dat_tiec.R;
 import com.sinhvien.nhom11_app_dat_tiec.Service;
-
 import java.util.List;
 
 public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceViewHolder> {
@@ -43,27 +37,18 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
         holder.tvPrice.setText("Giá: " + service.getPrice() + " VND");
 
         holder.btnEdit.setOnClickListener(v -> {
-            EditServiceFragment editFragment = EditServiceFragment.newInstance(service);
-            ((FragmentActivity) context).getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, editFragment)
-                    .addToBackStack(null)
-                    .commit();
+            ((ServiceActivity) context).navigateToEditService(service);
         });
 
         holder.btnDelete.setOnClickListener(v -> {
-            new AlertDialog.Builder(context)
-                    .setTitle("Xóa dịch vụ")
-                    .setMessage("Bạn có chắc chắn muốn xóa dịch vụ này?")
-                    .setPositiveButton("Xóa", (dialog, which) -> {
-                        DatabaseHelper dbHelper = new DatabaseHelper(context);
-                        dbHelper.deleteService(service.getId());
-                        services.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, services.size());
-                    })
-                    .setNegativeButton("Hủy", null)
-                    .show();
+            ((ServiceActivity) context).showDeleteConfirmation(service, position, this);
         });
+    }
+
+    public void removeItem(int position) {
+        services.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, services.size());
     }
 
     @Override

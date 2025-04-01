@@ -46,7 +46,15 @@ public class AddMenuFragment extends Fragment {
             etTitle.setError("Vui lòng nhập tên menu");
             return;
         }
+        if (dbHelper.isMenuNameExists(title)) {
+            etTitle.setError("Tên Menu đã tồn tại");
+            return;}
 
+        if (description.isEmpty()) {
+            etDescription.setError("Vui lòng nhập mô tả menu");
+            etDescription.requestFocus();
+            return;
+        }
         if (priceStr.isEmpty()) {
             etPrice.setError("Vui lòng nhập giá");
             return;

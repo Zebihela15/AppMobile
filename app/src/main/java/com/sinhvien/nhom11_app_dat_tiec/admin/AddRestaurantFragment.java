@@ -42,13 +42,15 @@ public class AddRestaurantFragment extends Fragment {
 
     private void showImageSelectionDialog() {
         // Danh sách tên và đường dẫn ảnh
-        String[] imageNames = {"Nhà hàng 1", "Nhà hàng 2", "Nhà hàng 3"};
+        String[] imageNames = {"Nhà hàng 1", "Nhà hàng 2", "Nhà hàng 3","Nhà hàng 4","Nhà Hàng 5"};
         String[] imagePaths = {
                 "path_to_image_1.jpg",
                 "path_to_image_2.jpg",
-                "path_to_image_3.jpg"
+                "path_to_image_3.jpg",
+                "path_to_image_4.jpg",
+                "path_to_image_5.jpg",
         };
-        int[] imagePreviews = {R.drawable.d11, R.drawable.d21, R.drawable.d31}; // Ảnh xem trước
+        int[] imagePreviews = {R.drawable.d11, R.drawable.d21, R.drawable.d31,R.drawable.d13,R.drawable.d24}; // Ảnh xem trước
 
         new AlertDialog.Builder(getContext())
                 .setTitle("Chọn hình ảnh")
@@ -63,13 +65,32 @@ public class AddRestaurantFragment extends Fragment {
         String title = etTitle.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
 
+        // Kiểm tra tên nhà hàng
         if (title.isEmpty()) {
             etTitle.setError("Vui lòng nhập tên nhà hàng");
+            etTitle.requestFocus();
             return;
         }
 
+        // Kiểm tra mô tả
+        if (description.isEmpty()) {
+            etDescription.setError("Vui lòng nhập mô tả nhà hàng");
+            etDescription.requestFocus();
+            return;
+        }
+
+        // Kiểm tra ảnh
         if (selectedImagePath.isEmpty()) {
             Toast.makeText(getContext(), "Vui lòng chọn ảnh nhà hàng", Toast.LENGTH_SHORT).show();
+            ivImage.requestFocus();
+            return;
+        }
+
+        // Kiểm tra trùng tên
+        if (dbHelper.isRestaurantNameExists(title)) {
+            etTitle.setError("Tên nhà hàng này đã tồn tại");
+            etTitle.requestFocus();
+            Toast.makeText(getContext(), "Đã có tên nhà hàng này rồi", Toast.LENGTH_SHORT).show();
             return;
         }
 

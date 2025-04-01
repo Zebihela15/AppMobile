@@ -43,6 +43,10 @@ public class AddServiceFragment extends Fragment {
             etTitle.setError("Vui lòng nhập tên dịch vụ");
             return;
         }
+        if (dbHelper.isServiceNameExists(title)) {
+            etTitle.setError("Tên Dịch vụ đã tồn tại");
+            return;}
+
 
         if (priceStr.isEmpty()) {
             etPrice.setError("Vui lòng nhập giá dịch vụ");
