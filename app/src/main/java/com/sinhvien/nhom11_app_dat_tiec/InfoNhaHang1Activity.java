@@ -1,4 +1,5 @@
 package com.sinhvien.nhom11_app_dat_tiec;
+
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,8 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-
+import com.google.android.material.button.MaterialButton;
 
 public class InfoNhaHang1Activity extends AppCompatActivity {
 
@@ -17,6 +17,7 @@ public class InfoNhaHang1Activity extends AppCompatActivity {
     private NestedScrollView nestedScrollView;
     private TextView introSection;
     private RecyclerView menuSection, gallerySection;
+    private MaterialButton btnSeeMore; // Thêm biến cho nút Xem thêm
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,15 @@ public class InfoNhaHang1Activity extends AppCompatActivity {
         introSection = findViewById(R.id.introSection);
         gallerySection = findViewById(R.id.gallerySection);
         menuSection = findViewById(R.id.menuSection);
+        btnSeeMore = findViewById(R.id.btnSeeMore); // Ánh xạ nút Xem thêm
+
+        // Thiết lập sự kiện click cho nút Xem thêm
+        btnSeeMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleIntro(v);
+            }
+        });
 
         // Khởi tạo RecyclerView
         int[] imageGallery = {
@@ -61,11 +71,9 @@ public class InfoNhaHang1Activity extends AppCompatActivity {
     public void closeDialog(View view) {
         fullIntroDialog.dismiss();
     }
+
     public void onBookingButtonClick(View view) {
         Intent intent = new Intent(InfoNhaHang1Activity.this, BookingActivity.class);
         startActivity(intent);
     }
 }
-
-   
-
